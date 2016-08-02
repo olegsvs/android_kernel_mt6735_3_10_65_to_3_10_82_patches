@@ -1,0 +1,55 @@
+From 2421acc285632f9362f6802b45e88c38a3fe8861 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Wed, 11 May 2016 00:19:38 +0300
+Subject: [PATCH 1103/1168] epl2182 TODO fix get_ps
+
+---
+ drivers/misc/mediatek/alsps/EPL2182-new/epl2182.c      | 18 ++++++++++++++++++
+ ...2\321\213\320\271 \321\204\320\260\320\271\320\273" |  2 +-
+ 2 files changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/misc/mediatek/alsps/EPL2182-new/epl2182.c b/drivers/misc/mediatek/alsps/EPL2182-new/epl2182.c
+index 2aeeaf4..b655d73 100644
+--- a/drivers/misc/mediatek/alsps/EPL2182-new/epl2182.c
++++ b/drivers/misc/mediatek/alsps/EPL2182-new/epl2182.c
+@@ -523,6 +523,24 @@ static int epl2182_get_als_value(struct epl2182_priv *obj, u16 als)
+ }
+ 
+ 
++static int epl2182_get_ps_value(struct epl2182_priv *obj, u16 ps)
++{
++
++	int mask = atomic_read(&obj->ps_mask);
++	int  val;
++
++	u8 flag;
++
++	
++	
++	val = -1;
++
++return val;
++
++	
++
++}
++
+ static int set_psensor_intr_threshold(uint16_t low_thd, uint16_t high_thd)
+ {
+     int ret = 0;
+diff --git "a/\320\275\320\276\320\262\321\213\320\271 \321\204\320\260\320\271\320\273" "b/\320\275\320\276\320\262\321\213\320\271 \321\204\320\260\320\271\320\273"
+index 631f6bd..99cd48e 100644
+--- "a/\320\275\320\276\320\262\321\213\320\271 \321\204\320\260\320\271\320\273"	
++++ "b/\320\275\320\276\320\262\321\213\320\271 \321\204\320\260\320\271\320\273"	
+@@ -10,7 +10,7 @@ export PATH=/home/olegsvs/5/aarch64-linux-gnu-5.3/bin:$PATH
+ 
+ export CROSS_COMPILE=/home/olegsvs/Android/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+ export ARCH=arm64 export ARCH_MTK_PLATFORM=mt6735m 
+-make benefit_m7_defconfig
++make benefit_m7_defconfig_B
+ make -j5
+ 
+ export CROSS_COMPILE=/home/olegsvs/Android/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+-- 
+2.7.4
+

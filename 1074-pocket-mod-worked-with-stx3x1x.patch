@@ -1,0 +1,219 @@
+From 3235fa963e09ca61ff0d100fbd1a4318b71ee340 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Mon, 9 May 2016 20:48:55 +0300
+Subject: [PATCH 1074/1168] pocket mod worked with stx3x1x
+
+---
+ .../misc/mediatek/alsps/stk3x1x_driver/stk3x1x.c   |  28 ++++++++++++--
+ .../mach/mt6735/benefit_m7/dct/dct/codegen.dws     | Bin 29764 -> 29982 bytes
+ drivers/misc/pocket_mod.c                          |  41 +++++++++++++--------
+ include/generated/compile.h                        |   4 +-
+ include/linux/pocket_mod.h                         |   4 +-
+ tools/dct/DCT.log                                  |   8 ++++
+ 6 files changed, 63 insertions(+), 22 deletions(-)
+
+diff --git a/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.c b/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.c
+index 392eb33..d14fda6 100644
+--- a/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.c
++++ b/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.c
+@@ -2699,13 +2699,33 @@ static ssize_t stk3x1x_show_config(struct device_driver *ddri, char *buf)
+ 	return res;    
+ }
+ /*----------------------------------------------------------------------------*/
++
++#ifdef CONFIG_TOUCHSCREEN_WAKE_FIX
++int stk3x1x_ps_check(void)
++{
++	int ps_val;
++
++	struct stk3x1x_priv *obj = stk3x1x_obj;
++	
++	if(obj == NULL)
++	{
++		return 0;
++	}
++	else
++	{
++		ps_val = stk3x1x_get_ps_value(obj, obj->ps);
++			return (ps_val);
++	}
++}
++#endif
++
+ #ifdef CONFIG_POCKETMOD
+ int stk3x1x_pocket_detection_check(void)
+ {
+ 	int ps_val;
+ 	int als_val;
+ 
+-	struct  stk3x1x_priv *obj = stk3x1x_obj;
++	struct stk3x1x_priv *obj = stk3x1x_obj;
+ 	
+ 	if(obj == NULL)
+ 	{
+@@ -2714,7 +2734,7 @@ int stk3x1x_pocket_detection_check(void)
+ 	}
+ 	else
+ 	{
+-		stk3x1x_enable_ps(obj->client, 1,1);
++		stk3x1x_enable_ps(obj->client, 1, 1);
+ 
+ 		msleep(50);
+ 
+@@ -2723,12 +2743,14 @@ int stk3x1x_pocket_detection_check(void)
+ 
+ 		APS_DBG("[stk3x1x] %s als_val = %d, ps_val = %d\n", __func__, als_val, ps_val);
+ 
+-		stk3x1x_enable_ps(obj->client, 0,1);
++		stk3x1x_enable_ps(obj->client, 0, 1);
+ 
+ 		return (ps_val);
+ 	}
+ }
+ #endif
++
++
+ static ssize_t stk3x1x_store_config(struct device_driver *ddri, const char *buf, size_t count)
+ {
+ 	int retry, als_deb, ps_deb, mask, hthres, lthres, err;
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/codegen.dws b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/codegen.dws
+index 36a9d07e96f78d1eafdf436160d14c982d7462c8..04b3ecc25f46239fee9e28dec62a3d474d34ab61 100644
+GIT binary patch
+delta 379
+zcmX@|f^ps}#tqYWM8z2x7~BIq{o|b-eO-eb<AYrM4B{sniYQJNuoId5K}u$lH8w>7
+z#3=GJB*rADq5@`?$rr42fYynKp}Wc14`L8rH38^qu=&l12t@(JDDpEV#w4&J(a8zS
+P0+S6`SvLRT_euc(%w%TL
+
+delta 132
+vcmbRDit)$`#tqYWCjaA5n7o141}lAmM`xk|%j5^V5M@;3ifle05SIb~0%tTR
+
+diff --git a/drivers/misc/pocket_mod.c b/drivers/misc/pocket_mod.c
+index af01499..feaf04f 100644
+--- a/drivers/misc/pocket_mod.c
++++ b/drivers/misc/pocket_mod.c
+@@ -32,24 +32,27 @@
+ #include <asm-generic/cputime.h>
+ #include <linux/pocket_mod.h>
+ 
+-int is_screen_on = 1;
+-char alsps_dev;
++int is_screen_on;
+ 
++#ifdef CONFIG_POCKETMOD
++unsigned pocket_mod_switch = 1;
++#else
+ unsigned pocket_mod_switch = 0;
++#endif
+ 
+ int device_is_pocketed(void) {
+ 
+ 	if (!(pocket_mod_switch))
+ 		return 0;
+ 
+-//	if (!(is_screen_on)) {
+-	//	if (pocket_mod_switch){
+-	//			if (1)
+-	//				return 0;
+-	//			else
+-	//				return 1;
+-	//	}
+-	//}
++	if (!(is_screen_on)) {
++		if (pocket_mod_switch) {
++			if (stk3x1x_pocket_detection_check() == 1)
++				return 0;
++			else
++				return 1;
++			}
++		}
+ 
+ 	return 0;
+ }
+@@ -73,12 +76,12 @@ static ssize_t pocket_mod_set(struct device *dev,
+ 	return size;
+ }
+ 
+-static DEVICE_ATTR(pocket_mod_enable, (S_IWUSR|S_IRUGO),
++static DEVICE_ATTR(enable, (S_IWUGO|S_IRUGO),
+ 		pocket_mod_show, pocket_mod_set);
+ 
+ static struct attribute *pocket_mod_attributes[] =
+ {
+-	&dev_attr_pocket_mod_enable.attr,
++	&dev_attr_enable.attr,
+ 	NULL
+ };
+ 
+@@ -102,8 +105,6 @@ static int pocket_mod_init_sysfs(void) {
+ 	struct kobject *pocket_mod_kobj;
+ 	pocket_mod_kobj = kobject_create_and_add("pocket_mod", NULL);
+ 
+-	dev_attr_pocket_mod_enable.attr.name = "enable";
+-
+ 	rc = sysfs_create_group(pocket_mod_kobj,
+ 			&pocket_mod_group);
+ 
+@@ -114,5 +115,15 @@ static int pocket_mod_init_sysfs(void) {
+ 
+ }
+ 
+-module_init(pocket_mod_init_sysfs);
++static int pocket_mod_init(void) {
++
++	int rc = 0;
++
++	rc = pocket_mod_init_sysfs();
++
++	return rc;
++
++}
++
++late_initcall(pocket_mod_init);
+ 
+diff --git a/include/generated/compile.h b/include/generated/compile.h
+index 769efc5..59e62c9 100644
+--- a/include/generated/compile.h
++++ b/include/generated/compile.h
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 1 */
++/* This file is auto generated, version 4 */
+ /* SMP PREEMPT */
+ #define UTS_MACHINE "arm64"
+-#define UTS_VERSION "#1 SMP PREEMPT Mon May 9 15:52:23 MSK 2016"
++#define UTS_VERSION "#4 SMP PREEMPT Mon May 9 20:37:46 MSK 2016"
+ #define LINUX_COMPILE_BY "olegsvs"
+ #define LINUX_COMPILE_HOST "olegsvs-develop"
+ #define LINUX_COMPILER "gcc version 4.9 20150123 (prerelease) (GCC) "
+diff --git a/include/linux/pocket_mod.h b/include/linux/pocket_mod.h
+index 6b07b86..4e669dc 100644
+--- a/include/linux/pocket_mod.h
++++ b/include/linux/pocket_mod.h
+@@ -1,10 +1,10 @@
++
+ #ifndef _LINUX_POCKET_MOD_H
+ #define _LINUX_POCKET_MOD_H
+ 
+ extern int is_screen_on;
+-extern char alsps_dev;
+ 
+-int AP3xx6_pocket_detection_check(void);
++int stk3x1x_pocket_detection_check(void);
+ 
+ int device_is_pocketed(void);
+ 
+diff --git a/tools/dct/DCT.log b/tools/dct/DCT.log
+index e69de29..e64b9e9 100644
+--- a/tools/dct/DCT.log
++++ b/tools/dct/DCT.log
+@@ -0,0 +1,8 @@
++/* Log generated by MTK SP DrvGen Version 03.13.6;
++ Log Time is Mon May 09 15:11:53 2016
++ */
++open operater parse MT6735M.fig OK!
++Edit operater parse .cmp file OK!
++Gencode operater parse .cmp file OK!
++Gencode cust_eint_md1.h OK!
++Gencode cust_power.h OK!
+-- 
+2.7.4
+

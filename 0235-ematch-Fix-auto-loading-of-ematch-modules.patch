@@ -1,0 +1,41 @@
+From 1d8b2db5e6338c8057aad1888933a96daa7ca8b8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ignacy=20Gaw=C4=99dzki?=
+ <ignacy.gawedzki@green-communications.fr>
+Date: Tue, 17 Feb 2015 20:15:20 +0100
+Subject: [PATCH 0235/1168] ematch: Fix auto-loading of ematch modules.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+[ Upstream commit 34eea79e2664b314cab6a30fc582fdfa7a1bb1df ]
+
+In tcf_em_validate(), after calling request_module() to load the
+kind-specific module, set em->ops to NULL before returning -EAGAIN, so
+that module_put() is not called again by tcf_em_tree_destroy().
+
+Signed-off-by: Ignacy Gawędzki <ignacy.gawedzki@green-communications.fr>
+Acked-by: Cong Wang <cwang@twopensource.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: d2934737538f200b04bb418d78b4030073ebe44a
+---
+ net/sched/ematch.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/net/sched/ematch.c b/net/sched/ematch.c
+index 3a633de..a2abc44 100644
+--- a/net/sched/ematch.c
++++ b/net/sched/ematch.c
+@@ -227,6 +227,7 @@ static int tcf_em_validate(struct tcf_proto *tp,
+ 				 * to replay the request.
+ 				 */
+ 				module_put(em->ops->owner);
++				em->ops = NULL;
+ 				err = -EAGAIN;
+ 			}
+ #endif
+-- 
+2.7.4
+

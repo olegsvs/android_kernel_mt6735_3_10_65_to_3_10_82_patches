@@ -1,0 +1,55 @@
+From b696e128ef9a547eebde1b3361d6692f90b1d021 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Tue, 10 May 2016 23:44:16 +0300
+Subject: [PATCH 1100/1168] JD9365 v8_3
+
+---
+ .../mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c | 10 +++-------
+ include/generated/compile.h                                    |  4 ++--
+ 2 files changed, 5 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+index b07a6c0..10f7947 100644
+--- a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+@@ -161,11 +161,7 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
+ {0xE0,1,{0x01}},
+ 
+ //Set VCOM
+-{0x00,1,{0x00}},
+-{0x01,1,{0xB0}},
+-{0x03,1,{0x00}},
+-{0x04,1,{0xB0}},
+-{0x0C,1,{0x74}},
++
+ 
+ //Set Gamma Power,1,{ VGMP,1,{VGMN,1,{VGSP,1,{VGSN
+ {0x17,1,{0x00}},
+@@ -184,8 +180,8 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
+ 
+ 
+ //SET RGBCYC
+-{0x37,1,{0x05}},	//SS=1,1,{ BGR=1
+-{0x38,1,{0x08}},	//JDT=100 column inversion
++{0x37,1,{0x01}},	//SS=1,1,{ BGR=1
++{0x38,1,{0x04}},	//JDT=100 column inversion //color? 
+ {0x3D,1,{0xFF}},
+ {0x3E,1,{0xFF}},
+ {0x3F,1,{0x7F}},
+diff --git a/include/generated/compile.h b/include/generated/compile.h
+index c4e691f..59c2319 100644
+--- a/include/generated/compile.h
++++ b/include/generated/compile.h
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 22 */
++/* This file is auto generated, version 28 */
+ /* SMP PREEMPT */
+ #define UTS_MACHINE "arm64"
+-#define UTS_VERSION "#22 SMP PREEMPT Tue May 10 22:54:20 MSK 2016"
++#define UTS_VERSION "#28 SMP PREEMPT Tue May 10 23:41:10 MSK 2016"
+ #define LINUX_COMPILE_BY "olegsvs"
+ #define LINUX_COMPILE_HOST "olegsvs-develop"
+ #define LINUX_COMPILER "gcc version 4.9 20150123 (prerelease) (GCC) "
+-- 
+2.7.4
+

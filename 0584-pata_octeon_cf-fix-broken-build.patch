@@ -1,0 +1,36 @@
+From a0f6355d8a33c38399c419019e5161ce9ae407f4 Mon Sep 17 00:00:00 2001
+From: Aaro Koskinen <aaro.koskinen@nokia.com>
+Date: Mon, 8 Jun 2015 11:32:43 +0300
+Subject: [PATCH 0584/1168] pata_octeon_cf: fix broken build
+
+commit 4710f2facb5c68d629015747bd09b37203e0d137 upstream.
+
+MODULE_DEVICE_TABLE is referring to wrong driver's table and breaks the
+build. Fix that.
+
+Signed-off-by: Aaro Koskinen <aaro.koskinen@nokia.com>
+Signed-off-by: Tejun Heo <tj@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 9dcc484f5e8bf36d97cf2261815995d5df80cef4
+---
+ drivers/ata/pata_octeon_cf.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/ata/pata_octeon_cf.c b/drivers/ata/pata_octeon_cf.c
+index e73bef3..5507f36 100755
+--- a/drivers/ata/pata_octeon_cf.c
++++ b/drivers/ata/pata_octeon_cf.c
+@@ -1068,7 +1068,7 @@ static struct of_device_id octeon_cf_match[] = {
+ 	},
+ 	{},
+ };
+-MODULE_DEVICE_TABLE(of, octeon_i2c_match);
++MODULE_DEVICE_TABLE(of, octeon_cf_match);
+ 
+ static struct platform_driver octeon_cf_driver = {
+ 	.probe		= octeon_cf_probe,
+-- 
+2.7.4
+

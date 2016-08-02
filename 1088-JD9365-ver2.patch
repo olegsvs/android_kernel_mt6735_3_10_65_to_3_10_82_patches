@@ -1,0 +1,25 @@
+From 2294e38898b1782fc5315f17044b840309a52f15 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Tue, 10 May 2016 21:22:13 +0300
+Subject: [PATCH 1088/1168] JD9365 ver2
+
+---
+ drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+index a360016..cb8d535 100644
+--- a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+@@ -155,7 +155,7 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
+ {0xE3,1,{0xF8}},
+ 
+ //--- Sequence Ctrl ----//
+-//{0x80,1,{0x02}},
++{0x80,1,{0x01}},
+ 
+ //--- Page1  ----//
+ {0xE0,1,{0x01}},
+-- 
+2.7.4
+

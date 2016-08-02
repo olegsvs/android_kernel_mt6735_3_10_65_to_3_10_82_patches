@@ -1,0 +1,38 @@
+From 4ce86529387619c9c5f4455021e5005d59d83b4d Mon Sep 17 00:00:00 2001
+From: Quentin Casasnovas <quentin.casasnovas@oracle.com>
+Date: Tue, 3 Mar 2015 16:31:38 +0100
+Subject: [PATCH 0254/1168] Btrfs:__add_inode_ref: out of bounds memory read
+ when looking for extended ref.
+
+commit dd9ef135e3542ffc621c4eb7f0091870ec7a1504 upstream.
+
+Improper arithmetics when calculting the address of the extended ref could
+lead to an out of bounds memory read and kernel panic.
+
+Signed-off-by: Quentin Casasnovas <quentin.casasnovas@oracle.com>
+Reviewed-by: David Sterba <dsterba@suse.cz>
+Signed-off-by: Chris Mason <clm@fb.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 3d44abf8fe7689a952b56b33f3dcc2910c11ad14
+---
+ fs/btrfs/tree-log.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/btrfs/tree-log.c b/fs/btrfs/tree-log.c
+index bca4363..7d3331c 100644
+--- a/fs/btrfs/tree-log.c
++++ b/fs/btrfs/tree-log.c
+@@ -943,7 +943,7 @@ again:
+ 		base = btrfs_item_ptr_offset(leaf, path->slots[0]);
+ 
+ 		while (cur_offset < item_size) {
+-			extref = (struct btrfs_inode_extref *)base + cur_offset;
++			extref = (struct btrfs_inode_extref *)(base + cur_offset);
+ 
+ 			victim_name_len = btrfs_inode_extref_name_len(leaf, extref);
+ 
+-- 
+2.7.4
+

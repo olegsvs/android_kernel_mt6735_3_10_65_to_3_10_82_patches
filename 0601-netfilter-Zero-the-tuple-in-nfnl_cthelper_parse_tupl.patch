@@ -1,0 +1,54 @@
+From 168dc196d5886e4d1ba3d341b952a027b8df22cc Mon Sep 17 00:00:00 2001
+From: Ian Wilson <iwilson@brocade.com>
+Date: Thu, 12 Mar 2015 09:37:58 +0000
+Subject: [PATCH 0601/1168] netfilter: Zero the tuple in
+ nfnl_cthelper_parse_tuple()
+
+commit 78146572b9cd20452da47951812f35b1ad4906be upstream.
+
+nfnl_cthelper_parse_tuple() is called from nfnl_cthelper_new(),
+nfnl_cthelper_get() and nfnl_cthelper_del().  In each case they pass
+a pointer to an nf_conntrack_tuple data structure local variable:
+
+    struct nf_conntrack_tuple tuple;
+    ...
+    ret = nfnl_cthelper_parse_tuple(&tuple, tb[NFCTH_TUPLE]);
+
+The problem is that this local variable is not initialized, and
+nfnl_cthelper_parse_tuple() only initializes two fields: src.l3num and
+dst.protonum.  This leaves all other fields with undefined values
+based on whatever is on the stack:
+
+    tuple->src.l3num = ntohs(nla_get_be16(tb[NFCTH_TUPLE_L3PROTONUM]));
+    tuple->dst.protonum = nla_get_u8(tb[NFCTH_TUPLE_L4PROTONUM]);
+
+The symptom observed was that when the rpc and tns helpers were added
+then traffic to port 1536 was being sent to user-space.
+
+Signed-off-by: Ian Wilson <iwilson@brocade.com>
+Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: a20deb44da3a8905b1985c3c3bec09536342556e
+---
+ net/netfilter/nfnetlink_cthelper.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/net/netfilter/nfnetlink_cthelper.c b/net/netfilter/nfnetlink_cthelper.c
+index a9da433..3b283ed 100644
+--- a/net/netfilter/nfnetlink_cthelper.c
++++ b/net/netfilter/nfnetlink_cthelper.c
+@@ -74,6 +74,9 @@ nfnl_cthelper_parse_tuple(struct nf_conntrack_tuple *tuple,
+ 	if (!tb[NFCTH_TUPLE_L3PROTONUM] || !tb[NFCTH_TUPLE_L4PROTONUM])
+ 		return -EINVAL;
+ 
++	/* Not all fields are initialized so first zero the tuple */
++	memset(tuple, 0, sizeof(struct nf_conntrack_tuple));
++
+ 	tuple->src.l3num = ntohs(nla_get_be16(tb[NFCTH_TUPLE_L3PROTONUM]));
+ 	tuple->dst.protonum = nla_get_u8(tb[NFCTH_TUPLE_L4PROTONUM]);
+ 
+-- 
+2.7.4
+

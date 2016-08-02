@@ -1,0 +1,35 @@
+From e179e3f13962c2323a4cab1efedae8df2a9d2b79 Mon Sep 17 00:00:00 2001
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+Date: Fri, 6 Mar 2015 10:49:21 +0000
+Subject: [PATCH 0316/1168] Change email address for 8250_pci
+
+commit f2e0ea861117bda073d1d7ffbd3120c07c0d5d34 upstream.
+
+I'm still receiving reports to my email address, so let's point this
+at the linux-serial mailing list instead.
+
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 67dcfcd50a0c98cc202fde501f6f3454b99eec4c
+---
+ drivers/tty/serial/8250/8250_pci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/tty/serial/8250/8250_pci.c b/drivers/tty/serial/8250/8250_pci.c
+index 8d3c0b5..98b8423 100755
+--- a/drivers/tty/serial/8250/8250_pci.c
++++ b/drivers/tty/serial/8250/8250_pci.c
+@@ -68,7 +68,7 @@ static void moan_device(const char *str, struct pci_dev *dev)
+ 	       "Please send the output of lspci -vv, this\n"
+ 	       "message (0x%04x,0x%04x,0x%04x,0x%04x), the\n"
+ 	       "manufacturer and name of serial board or\n"
+-	       "modem board to rmk+serial@arm.linux.org.uk.\n",
++	       "modem board to <linux-serial@vger.kernel.org>.\n",
+ 	       pci_name(dev), str, dev->vendor, dev->device,
+ 	       dev->subsystem_vendor, dev->subsystem_device);
+ }
+-- 
+2.7.4
+

@@ -1,0 +1,56 @@
+From 8d002abeb1f994a1f32c9257212b01d51a113aef Mon Sep 17 00:00:00 2001
+From: Andrzej Pietrasiewicz <andrzej.p@samsung.com>
+Date: Tue, 3 Mar 2015 10:52:05 +0100
+Subject: [PATCH 0484/1168] usb: gadget: printer: enqueue printer's response
+ for setup request
+
+commit eb132ccbdec5df46e29c9814adf76075ce83576b upstream.
+
+Function-specific setup requests should be handled in such a way, that
+apart from filling in the data buffer, the requests are also actually
+enqueued: if function-specific setup is called from composte_setup(),
+the "usb_ep_queue()" block of code in composite_setup() is skipped.
+
+The printer function lacks this part and it results in e.g. get device id
+requests failing: the host expects some response, the device prepares it
+but does not equeue it for sending to the host, so the host finally asserts
+timeout.
+
+This patch adds enqueueing the prepared responses.
+
+Fixes: 2e87edf49227: "usb: gadget: make g_printer use composite"
+Signed-off-by: Andrzej Pietrasiewicz <andrzej.p@samsung.com>
+Signed-off-by: Felipe Balbi <balbi@ti.com>
+[ported to stable 3.10 and 3.14]
+Signed-off-by: Andrzej Pietrasiewicz <andrzej.p@samsung.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: a6fc1d18cafc19d93fc06104a18f9f51cfff1fb0
+---
+ drivers/usb/gadget/printer.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/drivers/usb/gadget/printer.c b/drivers/usb/gadget/printer.c
+index bf7a56b..a0dfdbd 100755
+--- a/drivers/usb/gadget/printer.c
++++ b/drivers/usb/gadget/printer.c
+@@ -975,6 +975,15 @@ unknown:
+ 		break;
+ 	}
+ 	/* host either stalls (value < 0) or reports success */
++	if (value >= 0) {
++		req->length = value;
++		req->zero = value < wLength;
++		value = usb_ep_queue(cdev->gadget->ep0, req, GFP_ATOMIC);
++		if (value < 0) {
++			ERROR(dev, "%s:%d Error!\n", __func__, __LINE__);
++			req->status = 0;
++		}
++	}
+ 	return value;
+ }
+ 
+-- 
+2.7.4
+

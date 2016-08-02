@@ -1,0 +1,30 @@
+From 3f5c98899de86316720a68479deb7c375462de8e Mon Sep 17 00:00:00 2001
+From: Stefan Guendhoer <stefan@guendhoer.com>
+Date: Thu, 7 Jan 2016 22:48:22 +0000
+Subject: [PATCH 0918/1168] pocket-mod: set to disabled per default (as it
+ causes problems in combination with dt2w)
+
+Former-commit-id: c8f9beb55d7001a5668be5c7d5e9f8260e020b93
+---
+ drivers/misc/pocket_mod.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/drivers/misc/pocket_mod.c b/drivers/misc/pocket_mod.c
+index 179d216..68cdaef 100644
+--- a/drivers/misc/pocket_mod.c
++++ b/drivers/misc/pocket_mod.c
+@@ -35,11 +35,7 @@
+ int is_screen_on = 1;
+ char alsps_dev;
+ 
+-#ifdef CONFIG_POCKETMOD
+-unsigned pocket_mod_switch = 1;
+-#else
+ unsigned pocket_mod_switch = 0;
+-#endif
+ 
+ int device_is_pocketed(void) {
+ 
+-- 
+2.7.4
+

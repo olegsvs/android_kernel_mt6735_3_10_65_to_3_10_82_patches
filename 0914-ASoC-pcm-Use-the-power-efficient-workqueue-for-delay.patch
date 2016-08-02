@@ -1,0 +1,39 @@
+From b8efabbdab83a1ea8274ca18be6d72f207952a80 Mon Sep 17 00:00:00 2001
+From: Mark Brown <broonie@linaro.org>
+Date: Thu, 18 Jul 2013 11:52:17 +0100
+Subject: [PATCH 0914/1168] ASoC: pcm: Use the power efficient workqueue for
+ delayed powerdown
+
+There is no need to use a normal per-CPU workqueue for delayed power downs
+as they're not timing or performance critical and waking up a core for them
+would defeat some of the point.
+
+Signed-off-by: Mark Brown <broonie@linaro.org>
+Reviewed-by: Viresh Kumar <viresh.kumar@linaro.org>
+(cherry picked from commit d4e1a73acd4e894f8332f2093bceaef585cfab67)
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 8d55eb3d85f1c7002c63f1d3d5b43bb811d1d8f9
+---
+ sound/soc/soc-pcm.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/sound/soc/soc-pcm.c b/sound/soc/soc-pcm.c
+index 02d2691..5b1f179 100644
+--- a/sound/soc/soc-pcm.c
++++ b/sound/soc/soc-pcm.c
+@@ -408,8 +408,9 @@ static int soc_pcm_close(struct snd_pcm_substream *substream)
+ 		} else {
+ 			/* start delayed pop wq here for playback streams */
+ 			rtd->pop_wait = 1;
+-			schedule_delayed_work(&rtd->delayed_work,
+-				msecs_to_jiffies(rtd->pmdown_time));
++			queue_delayed_work(system_power_efficient_wq,
++					   &rtd->delayed_work,
++					   msecs_to_jiffies(rtd->pmdown_time));
+ 		}
+ 	} else {
+ 		/* capture streams can be powered down now */
+-- 
+2.7.4
+

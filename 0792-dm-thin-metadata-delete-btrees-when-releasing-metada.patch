@@ -1,0 +1,39 @@
+From a2ecd2afcbd720e46ba92e3c738d2ec9f28eac75 Mon Sep 17 00:00:00 2001
+From: Joe Thornber <ejt@redhat.com>
+Date: Wed, 12 Aug 2015 15:10:21 +0100
+Subject: [PATCH 0792/1168] dm thin metadata: delete btrees when releasing
+ metadata snapshot
+
+commit 7f518ad0a212e2a6fd68630e176af1de395070a7 upstream.
+
+The device details and mapping trees were just being decremented
+before.  Now btree_del() is called to do a deep delete.
+
+Signed-off-by: Joe Thornber <ejt@redhat.com>
+Signed-off-by: Mike Snitzer <snitzer@redhat.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 53afa61f59c09804c2b4ddd29920368c74071ddb
+---
+ drivers/md/dm-thin-metadata.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/md/dm-thin-metadata.c b/drivers/md/dm-thin-metadata.c
+index 3b1503d..43f6250 100755
+--- a/drivers/md/dm-thin-metadata.c
++++ b/drivers/md/dm-thin-metadata.c
+@@ -1281,8 +1281,8 @@ static int __release_metadata_snap(struct dm_pool_metadata *pmd)
+ 		return r;
+ 
+ 	disk_super = dm_block_data(copy);
+-	dm_sm_dec_block(pmd->metadata_sm, le64_to_cpu(disk_super->data_mapping_root));
+-	dm_sm_dec_block(pmd->metadata_sm, le64_to_cpu(disk_super->device_details_root));
++	dm_btree_del(&pmd->info, le64_to_cpu(disk_super->data_mapping_root));
++	dm_btree_del(&pmd->details_info, le64_to_cpu(disk_super->device_details_root));
+ 	dm_sm_dec_block(pmd->metadata_sm, held_root);
+ 
+ 	return dm_tm_unlock(pmd->tm, copy);
+-- 
+2.7.4
+

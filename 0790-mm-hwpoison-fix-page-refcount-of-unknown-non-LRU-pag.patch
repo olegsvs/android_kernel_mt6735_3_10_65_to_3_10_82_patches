@@ -1,0 +1,43 @@
+From e1b2ffbbd3089241c892b6cc6c31b818b13c6aa5 Mon Sep 17 00:00:00 2001
+From: Wanpeng Li <wanpeng.li@hotmail.com>
+Date: Fri, 14 Aug 2015 15:34:56 -0700
+Subject: [PATCH 0790/1168] mm/hwpoison: fix page refcount of unknown non LRU
+ page
+
+commit 4f32be677b124a49459e2603321c7a5605ceb9f8 upstream.
+
+After trying to drain pages from pagevec/pageset, we try to get reference
+count of the page again, however, the reference count of the page is not
+reduced if the page is still not on LRU list.
+
+Fix it by adding the put_page() to drop the page reference which is from
+__get_any_page().
+
+Signed-off-by: Wanpeng Li <wanpeng.li@hotmail.com>
+Acked-by: Naoya Horiguchi <n-horiguchi@ah.jp.nec.com>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 8a0b8eaf1a5bc976c44d452f1b823e40cf595a75
+---
+ mm/memory-failure.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/mm/memory-failure.c b/mm/memory-failure.c
+index ca96f41..f97d709 100644
+--- a/mm/memory-failure.c
++++ b/mm/memory-failure.c
+@@ -1473,6 +1473,8 @@ static int get_any_page(struct page *page, unsigned long pfn, int flags)
+ 		 */
+ 		ret = __get_any_page(page, pfn, 0);
+ 		if (!PageLRU(page)) {
++			/* Drop page reference which is from __get_any_page() */
++			put_page(page);
+ 			pr_info("soft_offline: %#lx: unknown non LRU page type %lx\n",
+ 				pfn, page->flags);
+ 			return -EIO;
+-- 
+2.7.4
+

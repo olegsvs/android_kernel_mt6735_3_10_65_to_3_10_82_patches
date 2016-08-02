@@ -1,0 +1,39 @@
+From 33543a5eb39c8e8d4715ed3a2aabf777689cfb3d Mon Sep 17 00:00:00 2001
+From: Felipe Balbi <balbi@ti.com>
+Date: Fri, 13 Feb 2015 15:38:33 -0600
+Subject: [PATCH 0428/1168] usb: core: hub: use new USB_RESUME_TIMEOUT
+
+commit bbc78c07a51f6fd29c227b1220a9016e585358ba upstream.
+
+Make sure we're using the new macro, so our
+resume signaling will always pass certification.
+
+Signed-off-by: Felipe Balbi <balbi@ti.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 94a5961a49ad0c7b0665ac12b974625079894261
+---
+ drivers/usb/core/hub.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
+index 812d3a4..0c60eb3 100755
+--- a/drivers/usb/core/hub.c
++++ b/drivers/usb/core/hub.c
+@@ -3726,10 +3726,10 @@ int usb_port_resume(struct usb_device *udev, pm_message_t msg)
+ 		dev_dbg(hub->intfdev, "can't resume port %d, status %d\n",
+ 				port1, status);
+ 	} else {
+-		/* drive resume for at least 20 msec */
++		/* drive resume for USB_RESUME_TIMEOUT msec */
+ 		dev_dbg(&udev->dev, "usb %sresume\n",
+ 				(PMSG_IS_AUTO(msg) ? "auto-" : ""));
+-		msleep(25);
++		msleep(USB_RESUME_TIMEOUT);
+ 
+ 		/* Virtual root hubs can trigger on GET_PORT_STATUS to
+ 		 * stop resume signaling.  Then finish the resume
+-- 
+2.7.4
+

@@ -1,0 +1,38 @@
+From 7700e1c527958c824db1923959b24023da9ea874 Mon Sep 17 00:00:00 2001
+From: Chuck Lever <chuck.lever@oracle.com>
+Date: Tue, 26 May 2015 11:53:52 -0400
+Subject: [PATCH 0713/1168] NFS: Fix size of NFSACL SETACL operations
+
+commit d683cc49daf7c5afca8cd9654aaa1bf63cdf2ad9 upstream.
+
+When encoding the NFSACL SETACL operation, reserve just the estimated
+size of the ACL rather than a fixed maximum. This eliminates needless
+zero padding on the wire that the server ignores.
+
+Fixes: ee5dc7732bd5 ('NFS: Fix "kernel BUG at fs/nfs/nfs3xdr.c:1338!"')
+Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+Signed-off-by: Trond Myklebust <trond.myklebust@primarydata.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 8b9d767c7ae21a1f33ecfcb373322079e565d9ba
+---
+ fs/nfs/nfs3xdr.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fs/nfs/nfs3xdr.c b/fs/nfs/nfs3xdr.c
+index fa6d721..4495cad 100644
+--- a/fs/nfs/nfs3xdr.c
++++ b/fs/nfs/nfs3xdr.c
+@@ -1342,7 +1342,7 @@ static void nfs3_xdr_enc_setacl3args(struct rpc_rqst *req,
+ 	if (args->npages != 0)
+ 		xdr_write_pages(xdr, args->pages, 0, args->len);
+ 	else
+-		xdr_reserve_space(xdr, NFS_ACL_INLINE_BUFSIZE);
++		xdr_reserve_space(xdr, args->len);
+ 
+ 	error = nfsacl_encode(xdr->buf, base, args->inode,
+ 			    (args->mask & NFS_ACL) ?
+-- 
+2.7.4
+

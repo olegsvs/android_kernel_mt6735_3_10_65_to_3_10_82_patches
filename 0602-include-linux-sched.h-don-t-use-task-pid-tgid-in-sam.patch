@@ -1,0 +1,59 @@
+From 9d703d946049a40d8a7e0c8e699c0a47ef63aab2 Mon Sep 17 00:00:00 2001
+From: Oleg Nesterov <oleg@redhat.com>
+Date: Wed, 11 Sep 2013 14:20:06 -0700
+Subject: [PATCH 0602/1168] include/linux/sched.h: don't use task->pid/tgid in
+ same_thread_group/has_group_leader_pid
+
+commit e1403b8edf669ff49bbdf602cc97fefa2760cb15 upstream.
+
+task_struct->pid/tgid should go away.
+
+1. Change same_thread_group() to use task->signal for comparison.
+
+2. Change has_group_leader_pid(task) to compare task_pid(task) with
+   signal->leader_pid.
+
+Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+Cc: Michal Hocko <mhocko@suse.cz>
+Cc: Sergey Dyasly <dserrg@gmail.com>
+Reviewed-by: "Eric W. Biederman" <ebiederm@xmission.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@elte.hu>
+Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 3577e66ee430f4d93bd49e05e007b9b8bad0ef34
+---
+ include/linux/sched.h | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/include/linux/sched.h b/include/linux/sched.h
+index 85079d3..1bebffe 100644
+--- a/include/linux/sched.h
++++ b/include/linux/sched.h
+@@ -2346,15 +2346,15 @@ static inline bool thread_group_leader(struct task_struct *p)
+  * all we care about is that we have a task with the appropriate
+  * pid, we don't actually care if we have the right task.
+  */
+-static inline int has_group_leader_pid(struct task_struct *p)
++static inline bool has_group_leader_pid(struct task_struct *p)
+ {
+-	return p->pid == p->tgid;
++	return task_pid(p) == p->signal->leader_pid;
+ }
+ 
+ static inline
+-int same_thread_group(struct task_struct *p1, struct task_struct *p2)
++bool same_thread_group(struct task_struct *p1, struct task_struct *p2)
+ {
+-	return p1->tgid == p2->tgid;
++	return p1->signal == p2->signal;
+ }
+ 
+ static inline struct task_struct *next_thread(const struct task_struct *p)
+-- 
+2.7.4
+

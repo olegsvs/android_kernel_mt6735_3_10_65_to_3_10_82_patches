@@ -1,0 +1,63 @@
+From 23d1c44c4460f846c785161de92af4029b594509 Mon Sep 17 00:00:00 2001
+From: Lv Zheng <lv.zheng@intel.com>
+Date: Wed, 1 Jul 2015 14:43:26 +0800
+Subject: [PATCH 0704/1168] ACPICA: Tables: Fix an issue that FACS
+ initialization is performed twice
+
+commit c04be18448355441a0c424362df65b6422e27bda upstream.
+
+ACPICA commit 90f5332a15e9d9ba83831ca700b2b9f708274658
+
+This patch adds a new FACS initialization flag for acpi_tb_initialize().
+acpi_enable_subsystem() might be invoked several times in OS bootup process,
+and we don't want FACS initialization to be invoked twice. Lv Zheng.
+
+Link: https://github.com/acpica/acpica/commit/90f5332a
+Signed-off-by: Lv Zheng <lv.zheng@intel.com>
+Signed-off-by: Bob Moore <robert.moore@intel.com>
+Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: ece22f6b5ba86e17c246d436fca5074ecce9342a
+---
+ drivers/acpi/acpica/utxfinit.c | 10 ++++++----
+ include/acpi/actypes.h         |  1 +
+ 2 files changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/acpi/acpica/utxfinit.c b/drivers/acpi/acpica/utxfinit.c
+index 41ebaaf..ee58a62 100755
+--- a/drivers/acpi/acpica/utxfinit.c
++++ b/drivers/acpi/acpica/utxfinit.c
+@@ -165,10 +165,12 @@ acpi_status acpi_enable_subsystem(u32 flags)
+ 	 * Obtain a permanent mapping for the FACS. This is required for the
+ 	 * Global Lock and the Firmware Waking Vector
+ 	 */
+-	status = acpi_tb_initialize_facs();
+-	if (ACPI_FAILURE(status)) {
+-		ACPI_WARNING((AE_INFO, "Could not map the FACS table"));
+-		return_ACPI_STATUS(status);
++	if (!(flags & ACPI_NO_FACS_INIT)) {
++		status = acpi_tb_initialize_facs();
++		if (ACPI_FAILURE(status)) {
++			ACPI_WARNING((AE_INFO, "Could not map the FACS table"));
++			return_ACPI_STATUS(status);
++		}
+ 	}
+ #endif				/* !ACPI_REDUCED_HARDWARE */
+ 
+diff --git a/include/acpi/actypes.h b/include/acpi/actypes.h
+index f819e81..4407354 100644
+--- a/include/acpi/actypes.h
++++ b/include/acpi/actypes.h
+@@ -511,6 +511,7 @@ typedef u64 acpi_integer;
+ #define ACPI_NO_ACPI_ENABLE             0x10
+ #define ACPI_NO_DEVICE_INIT             0x20
+ #define ACPI_NO_OBJECT_INIT             0x40
++#define ACPI_NO_FACS_INIT               0x80
+ 
+ /*
+  * Initialization state
+-- 
+2.7.4
+

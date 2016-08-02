@@ -1,0 +1,34 @@
+From 2c803a2bba08cbf5ecb708211c7102533e4205d2 Mon Sep 17 00:00:00 2001
+From: Mike Snitzer <snitzer@redhat.com>
+Date: Tue, 13 Oct 2015 12:04:28 -0400
+Subject: [PATCH 1002/1168] dm thin: fix missing pool reference count decrement
+ in pool_ctr error path
+
+commit ba30670f4d5292c4e7f7980bbd5071f7c4794cdd upstream.
+
+Fixes: ac8c3f3df ("dm thin: generate event when metadata threshold passed")
+Signed-off-by: Mike Snitzer <snitzer@redhat.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: b8439650d49f7519de166f30f909826265d75083
+---
+ drivers/md/dm-thin.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/md/dm-thin.c b/drivers/md/dm-thin.c
+index 39996ca..ec56072 100755
+--- a/drivers/md/dm-thin.c
++++ b/drivers/md/dm-thin.c
+@@ -2109,7 +2109,7 @@ static int pool_ctr(struct dm_target *ti, unsigned argc, char **argv)
+ 						metadata_low_callback,
+ 						pool);
+ 	if (r)
+-		goto out_free_pt;
++		goto out_flags_changed;
+ 
+ 	pt->callbacks.congested_fn = pool_is_congested;
+ 	dm_table_add_target_callbacks(ti->table, &pt->callbacks);
+-- 
+2.7.4
+

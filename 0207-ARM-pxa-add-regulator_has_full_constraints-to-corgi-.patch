@@ -1,0 +1,57 @@
+From 571dd9e3c1a2fe61732e0a7a7c49d0d4efd24419 Mon Sep 17 00:00:00 2001
+From: Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>
+Date: Thu, 4 Dec 2014 14:10:00 +0300
+Subject: [PATCH 0207/1168] ARM: pxa: add regulator_has_full_constraints to
+ corgi board file
+
+commit 271e80176aae4e5b481f4bb92df9768c6075bbca upstream.
+
+Add regulator_has_full_constraints() call to corgi board file to let
+regulator core know that we do not have any additional regulators left.
+This lets it substitute unprovided regulators with dummy ones.
+
+This fixes the following warnings that can be seen on corgi if
+regulators are enabled:
+
+ads7846 spi1.0: unable to get regulator: -517
+spi spi1.0: Driver ads7846 requests probe deferral
+wm8731 0-001b: Failed to get supply 'AVDD': -517
+wm8731 0-001b: Failed to request supplies: -517
+wm8731 0-001b: ASoC: failed to probe component -517
+corgi-audio corgi-audio: ASoC: failed to instantiate card -517
+
+Signed-off-by: Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>
+Acked-by: Mark Brown <broonie@kernel.org>
+Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: cad387287cff962e7440b6382c1fa56632152c36
+---
+ arch/arm/mach-pxa/corgi.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/arch/arm/mach-pxa/corgi.c b/arch/arm/mach-pxa/corgi.c
+index a5b8fea..9cb7ea7 100644
+--- a/arch/arm/mach-pxa/corgi.c
++++ b/arch/arm/mach-pxa/corgi.c
+@@ -26,6 +26,7 @@
+ #include <linux/i2c.h>
+ #include <linux/i2c/pxa-i2c.h>
+ #include <linux/io.h>
++#include <linux/regulator/machine.h>
+ #include <linux/spi/spi.h>
+ #include <linux/spi/ads7846.h>
+ #include <linux/spi/corgi_lcd.h>
+@@ -711,6 +712,8 @@ static void __init corgi_init(void)
+ 		sharpsl_nand_partitions[1].size = 53 * 1024 * 1024;
+ 
+ 	platform_add_devices(devices, ARRAY_SIZE(devices));
++
++	regulator_has_full_constraints();
+ }
+ 
+ static void __init fixup_corgi(struct tag *tags, char **cmdline,
+-- 
+2.7.4
+

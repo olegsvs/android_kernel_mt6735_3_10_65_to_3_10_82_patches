@@ -1,0 +1,34 @@
+From c2e297a9d780372accd50a3c2717f5c96e2f3401 Mon Sep 17 00:00:00 2001
+From: Malcolm Priestley <tvboxspy@gmail.com>
+Date: Sat, 7 Mar 2015 17:04:54 +0000
+Subject: [PATCH 0365/1168] vt6655: RFbSetPower fix missing rate RATE_12M
+
+commit 40c8790bcb7ac74f3038153cd09310e220c6a1df upstream.
+
+When the driver sets this rate a power of zero value is set causing
+data flow stoppage until another rate is tried.
+
+Signed-off-by: Malcolm Priestley <tvboxspy@gmail.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 11a8562abc4a73823c6836a2bab32fceb454347e
+---
+ drivers/staging/vt6655/rf.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/staging/vt6655/rf.c b/drivers/staging/vt6655/rf.c
+index 6948984..c2d6028 100755
+--- a/drivers/staging/vt6655/rf.c
++++ b/drivers/staging/vt6655/rf.c
+@@ -966,6 +966,7 @@ bool RFbSetPower(
+ 		break;
+ 	case RATE_6M:
+ 	case RATE_9M:
++	case RATE_12M:
+ 	case RATE_18M:
+ 		byPwr = pDevice->abyOFDMPwrTbl[uCH];
+ 		if (pDevice->byRFType == RF_UW2452) {
+-- 
+2.7.4
+

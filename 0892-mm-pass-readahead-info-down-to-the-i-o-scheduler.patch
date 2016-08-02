@@ -1,0 +1,67 @@
+From dea8b6e643f28af638bf84a361733b87249b5656 Mon Sep 17 00:00:00 2001
+From: Lee Susman <lsusman@codeaurora.org>
+Date: Sun, 5 May 2013 17:31:17 +0300
+Subject: [PATCH 0892/1168] mm: pass readahead info down to the i/o scheduler
+
+Some i/o schedulers (i.e. row-iosched, cfq-iosched) deploy an idling
+algorithm in order to be better synced with the readahead algorithm.
+Idling is a prediction algorithm for incoming read requests.
+
+In this patch we mark pages which are part of a readahead window, by
+setting a newly introduced flag. With this flag, the i/o scheduler can
+identify a request which is associated with a readahead page. This
+enables the i/o scheduler's idling mechanism to be en-sync with the
+readahead mechanism and, in turn, can increase read throughput.
+
+Change-Id: I0654f23315b6d19d71bcc9cc029c6b281a44b196
+Signed-off-by: Lee Susman <lsusman@codeaurora.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 5cee54eb96b6a586f02dc99f75393e0408b046c9
+---
+ include/linux/page-flags.h | 1 +
+ mm/page_alloc.c            | 1 +
+ mm/readahead.c             | 3 +++
+ 3 files changed, 5 insertions(+)
+
+diff --git a/include/linux/page-flags.h b/include/linux/page-flags.h
+index 6d53675..7fbd672 100644
+--- a/include/linux/page-flags.h
++++ b/include/linux/page-flags.h
+@@ -109,6 +109,7 @@ enum pageflags {
+ #ifdef CONFIG_TRANSPARENT_HUGEPAGE
+ 	PG_compound_lock,
+ #endif
++	PG_readahead,		/* page in a readahead window */
+ 	__NR_PAGEFLAGS,
+ 
+ 	/* Filesystems */
+diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+index ed5cec4..a85b59a 100644
+--- a/mm/page_alloc.c
++++ b/mm/page_alloc.c
+@@ -7550,6 +7550,7 @@ static const struct trace_print_flags pageflag_names[] = {
+ #ifdef CONFIG_TRANSPARENT_HUGEPAGE
+ 	{1UL << PG_compound_lock,	"compound_lock"	},
+ #endif
++	{1UL << PG_readahead,           "PG_readahead"  },
+ };
+ 
+ static void dump_page_flags(unsigned long flags)
+diff --git a/mm/readahead.c b/mm/readahead.c
+index daed28d..87bc497 100644
+--- a/mm/readahead.c
++++ b/mm/readahead.c
+@@ -186,6 +186,9 @@ __do_page_cache_readahead(struct address_space *mapping, struct file *filp,
+ 		if (!page)
+ 			break;
+ 		page->index = page_offset;
++
++		page->flags |= (1L << PG_readahead);
++
+ 		list_add(&page->lru, &page_pool);
+ 		if (page_idx == nr_to_read - lookahead_size)
+ 			SetPageReadahead(page);
+-- 
+2.7.4
+

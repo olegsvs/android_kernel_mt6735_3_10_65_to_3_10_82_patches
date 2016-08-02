@@ -1,0 +1,45 @@
+From 7658bc22faf734b3824b6773685fc569d7f3dbda Mon Sep 17 00:00:00 2001
+From: Bart Van Assche <bart.vanassche@sandisk.com>
+Date: Thu, 19 Mar 2015 22:25:16 -0700
+Subject: [PATCH 0359/1168] tcm_qla2xxx: Fix incorrect use of
+ __transport_register_session
+
+commit 75c3d0bf9caebb502e96683b2bc37f9692437e68 upstream.
+
+This patch fixes the incorrect use of __transport_register_session()
+in tcm_qla2xxx_check_initiator_node_acl() code, that does not perform
+explicit se_tpg->session_lock when accessing se_tpg->tpg_sess_list
+to add new se_sess nodes.
+
+Given that tcm_qla2xxx_check_initiator_node_acl() is not called with
+qla_hw->hardware_lock held for all accesses of ->tpg_sess_list, the
+code should be using transport_register_session() instead.
+
+Signed-off-by: Bart Van Assche <bart.vanassche@sandisk.com>
+Cc: Giridhar Malavali <giridhar.malavali@qlogic.com>
+Cc: Quinn Tran <quinn.tran@qlogic.com>
+Signed-off-by: Nicholas Bellinger <nab@linux-iscsi.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 1b5f032d05bd11e8a5bfa771c726f56416208551
+---
+ drivers/scsi/qla2xxx/tcm_qla2xxx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/scsi/qla2xxx/tcm_qla2xxx.c b/drivers/scsi/qla2xxx/tcm_qla2xxx.c
+index cfd49ec..c817160 100755
+--- a/drivers/scsi/qla2xxx/tcm_qla2xxx.c
++++ b/drivers/scsi/qla2xxx/tcm_qla2xxx.c
+@@ -1465,7 +1465,7 @@ static int tcm_qla2xxx_check_initiator_node_acl(
+ 	/*
+ 	 * Finally register the new FC Nexus with TCM
+ 	 */
+-	__transport_register_session(se_nacl->se_tpg, se_nacl, se_sess, sess);
++	transport_register_session(se_nacl->se_tpg, se_nacl, se_sess, sess);
+ 
+ 	return 0;
+ }
+-- 
+2.7.4
+

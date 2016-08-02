@@ -1,0 +1,39 @@
+From a524a8238e63af3477bc8477b7396498ddc3facf Mon Sep 17 00:00:00 2001
+From: Miklos Szeredi <mszeredi@suse.cz>
+Date: Thu, 26 Feb 2015 11:45:47 +0100
+Subject: [PATCH 0313/1168] fuse: set stolen page uptodate
+
+commit aa991b3b267e24f578bac7b09cc57579b660304b upstream.
+
+Regular pipe buffers' ->steal method (generic_pipe_buf_steal()) doesn't set
+PG_uptodate.
+
+Don't warn on this condition, just set the uptodate flag.
+
+Signed-off-by: Miklos Szeredi <mszeredi@suse.cz>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 727d7c012d05c1236f5817fb92532c5e9f5851a6
+---
+ fs/fuse/dev.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/fs/fuse/dev.c b/fs/fuse/dev.c
+index 617ab59..812867b 100644
+--- a/fs/fuse/dev.c
++++ b/fs/fuse/dev.c
+@@ -896,8 +896,8 @@ static int fuse_try_move_page(struct fuse_copy_state *cs, struct page **pagep)
+ 
+ 	newpage = buf->page;
+ 
+-	if (WARN_ON(!PageUptodate(newpage)))
+-		return -EIO;
++	if (!PageUptodate(newpage))
++		SetPageUptodate(newpage);
+ 
+ 	ClearPageMappedToDisk(newpage);
+ 
+-- 
+2.7.4
+

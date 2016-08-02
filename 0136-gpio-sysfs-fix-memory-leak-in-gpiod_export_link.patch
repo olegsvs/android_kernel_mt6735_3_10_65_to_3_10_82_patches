@@ -1,0 +1,36 @@
+From 702f24118054617acfd5b59395857f572f94a15f Mon Sep 17 00:00:00 2001
+From: Johan Hovold <johan@kernel.org>
+Date: Mon, 26 Jan 2015 12:02:45 +0100
+Subject: [PATCH 0136/1168] gpio: sysfs: fix memory leak in gpiod_export_link
+
+commit 0f303db08df0df9bd0966443ad6001e63960af16 upstream.
+
+Fix memory leak in the gpio sysfs interface due to failure to drop
+reference to device returned by class_find_device when creating a link.
+
+Fixes: a4177ee7f1a8 ("gpiolib: allow exported GPIO nodes to be named using sysfs links")
+Signed-off-by: Johan Hovold <johan@kernel.org>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: fc5c73c5191a66b1f5d5044858a14a48b6339e0c
+---
+ drivers/gpio/gpiolib.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/gpio/gpiolib.c b/drivers/gpio/gpiolib.c
+index 060f24c..c5863c5 100755
+--- a/drivers/gpio/gpiolib.c
++++ b/drivers/gpio/gpiolib.c
+@@ -874,6 +874,7 @@ static int gpiod_export_link(struct device *dev, const char *name,
+ 		if (tdev != NULL) {
+ 			status = sysfs_create_link(&dev->kobj, &tdev->kobj,
+ 						name);
++			put_device(tdev);
+ 		} else {
+ 			status = -ENODEV;
+ 		}
+-- 
+2.7.4
+

@@ -1,0 +1,39 @@
+From 4e3fddb8cc3b1083d2e51e691b83859a231418aa Mon Sep 17 00:00:00 2001
+From: Luciano Coelho <luciano.coelho@intel.com>
+Date: Tue, 27 Jan 2015 15:06:57 +0200
+Subject: [PATCH 0178/1168] iwlwifi: mvm: fix failure path when power_update
+ fails in add_interface
+
+commit fd66fc1cafd72ddf27dbec3a5e29e99839d1bc84 upstream.
+
+When iwl_mvm_power_update_mac() is called, we have already added the
+mac context, so if this call fails we should remove the mac.
+
+Fixes: commit e5e7aa8e2561 ('iwlwifi: mvm: refactor power code')
+Signed-off-by: Luciano Coelho <luciano.coelho@intel.com>
+Reviewed-by: Johannes Berg <johannes.berg@intel.com>
+Signed-off-by: Emmanuel Grumbach <emmanuel.grumbach@intel.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 1ac89b7e40a3e7ab1665700a189825d7e4d5d2ce
+---
+ drivers/net/wireless/iwlwifi/mvm/mac80211.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/wireless/iwlwifi/mvm/mac80211.c b/drivers/net/wireless/iwlwifi/mvm/mac80211.c
+index 88b9c09..9341339 100755
+--- a/drivers/net/wireless/iwlwifi/mvm/mac80211.c
++++ b/drivers/net/wireless/iwlwifi/mvm/mac80211.c
+@@ -544,7 +544,7 @@ static int iwl_mvm_mac_add_interface(struct ieee80211_hw *hw,
+ 
+ 	ret = iwl_mvm_mac_ctxt_add(mvm, vif);
+ 	if (ret)
+-		goto out_release;
++		goto out_remove_mac;
+ 
+ 	/*
+ 	 * Update power state on the new interface. Admittedly, based on
+-- 
+2.7.4
+

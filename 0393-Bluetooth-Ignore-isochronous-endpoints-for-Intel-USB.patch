@@ -1,0 +1,38 @@
+From 3013b534816f80426d39db877999941073f3ea58 Mon Sep 17 00:00:00 2001
+From: Marcel Holtmann <marcel@holtmann.org>
+Date: Sun, 6 Jul 2014 14:53:55 +0200
+Subject: [PATCH 0393/1168] Bluetooth: Ignore isochronous endpoints for Intel
+ USB bootloader
+
+commit d92f2df0565ea04101d6ac04bdc10feeb1d93c94 upstream.
+
+The isochronous endpoints are not valid when the Intel Bluetooth
+controller boots up in bootloader mode. So just mark these endpoints
+as broken and then they will not be configured.
+
+Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
+Signed-off-by: Johan Hedberg <johan.hedberg@intel.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+Former-commit-id: c7051f9adefb393216e5175733e0d49cbec5de76
+---
+ drivers/bluetooth/btusb.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/bluetooth/btusb.c b/drivers/bluetooth/btusb.c
+index 5fd1674..92b9853 100755
+--- a/drivers/bluetooth/btusb.c
++++ b/drivers/bluetooth/btusb.c
+@@ -118,7 +118,8 @@ static struct usb_device_id btusb_table[] = {
+ 	{ USB_VENDOR_AND_INTERFACE_INFO(0x13d3, 0xff, 0x01, 0x01) },
+ 
+ 	/* Intel Bluetooth USB Bootloader (RAM module) */
+-	{ USB_DEVICE(0x8087, 0x0a5a), .driver_info = BTUSB_INTEL_BOOT },
++	{ USB_DEVICE(0x8087, 0x0a5a),
++	  .driver_info = BTUSB_INTEL_BOOT | BTUSB_BROKEN_ISOC },
+ 
+ 	{ }	/* Terminating entry */
+ };
+-- 
+2.7.4
+

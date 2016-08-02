@@ -1,0 +1,49 @@
+From e620e420c3581454dbf58f1e142ba16a334f3f07 Mon Sep 17 00:00:00 2001
+From: Jeff Mahoney <jeffm@suse.com>
+Date: Fri, 20 Mar 2015 14:02:09 -0400
+Subject: [PATCH 0589/1168] btrfs: cleanup orphans while looking up default
+ subvolume
+
+commit 727b9784b6085c99c2f836bf4fcc2848dc9cf904 upstream.
+
+Orphans in the fs tree are cleaned up via open_ctree and subvolume
+orphans are cleaned via btrfs_lookup_dentry -- except when a default
+subvolume is in use.  The name for the default subvolume uses a manual
+lookup that doesn't trigger orphan cleanup and needs to trigger it
+manually as well. This doesn't apply to the remount case since the
+subvolumes are cleaned up by walking the root radix tree.
+
+Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+Reviewed-by: David Sterba <dsterba@suse.cz>
+Signed-off-by: Chris Mason <clm@fb.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: e42e10b28679d8103b87d2ec4dc3cb7444aa333f
+---
+ fs/btrfs/super.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/fs/btrfs/super.c b/fs/btrfs/super.c
+index f0857e0..68891ff 100644
+--- a/fs/btrfs/super.c
++++ b/fs/btrfs/super.c
+@@ -779,6 +779,15 @@ find_root:
+ 	if (btrfs_root_refs(&new_root->root_item) == 0)
+ 		return ERR_PTR(-ENOENT);
+ 
++	if (!(sb->s_flags & MS_RDONLY)) {
++		int ret;
++		down_read(&fs_info->cleanup_work_sem);
++		ret = btrfs_orphan_cleanup(new_root);
++		up_read(&fs_info->cleanup_work_sem);
++		if (ret)
++			return ERR_PTR(ret);
++	}
++
+ 	dir_id = btrfs_root_dirid(&new_root->root_item);
+ setup_root:
+ 	location.objectid = dir_id;
+-- 
+2.7.4
+

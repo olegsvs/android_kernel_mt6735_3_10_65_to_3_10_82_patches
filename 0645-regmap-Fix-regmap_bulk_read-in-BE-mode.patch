@@ -1,0 +1,40 @@
+From 196459d6b5abf328b3ae8bc983b9fd05a10441af Mon Sep 17 00:00:00 2001
+From: Arun Chandran <achandran@mvista.com>
+Date: Mon, 15 Jun 2015 15:59:02 +0530
+Subject: [PATCH 0645/1168] regmap: Fix regmap_bulk_read in BE mode
+
+commit 15b8d2c41fe5839582029f65c5f7004db451cc2b upstream.
+
+In big endian mode regmap_bulk_read gives incorrect data
+for byte reads.
+
+This is because memcpy of a single byte from an address
+after full word read gives different results when
+endianness differs. ie. we get little-end in LE and big-end in BE.
+
+Signed-off-by: Arun Chandran <achandran@mvista.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: cdc9824928613373d79f615474503d384a2c5129
+---
+ drivers/base/regmap/regmap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/base/regmap/regmap.c b/drivers/base/regmap/regmap.c
+index 6a66f0b..4f3d70a 100755
+--- a/drivers/base/regmap/regmap.c
++++ b/drivers/base/regmap/regmap.c
+@@ -1586,7 +1586,7 @@ int regmap_bulk_read(struct regmap *map, unsigned int reg, void *val,
+ 					  &ival);
+ 			if (ret != 0)
+ 				return ret;
+-			memcpy(val + (i * val_bytes), &ival, val_bytes);
++			map->format.format_val(val + (i * val_bytes), ival, 0);
+ 		}
+ 	}
+ 
+-- 
+2.7.4
+

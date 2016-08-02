@@ -1,0 +1,52 @@
+From e8273b57847f78ef2e9eeecb833101396a4457a7 Mon Sep 17 00:00:00 2001
+From: "Eric W. Biederman" <ebiederm@xmission.com>
+Date: Tue, 11 Mar 2014 14:17:41 -0700
+Subject: [PATCH 0381/1168] bnx2: Call dev_kfree_skby_any instead of
+ dev_kfree_skb.
+
+Replace dev_kfree_skb with dev_kfree_skb_any in functions that can
+be called in hard irq and other contexts.
+
+Signed-off-by: "Eric W. Biederman" <ebiederm@xmission.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+Former-commit-id: e37c56c516eba967897455ce0a7fcfc37b079d0b
+---
+ drivers/net/ethernet/broadcom/bnx2.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/net/ethernet/broadcom/bnx2.c b/drivers/net/ethernet/broadcom/bnx2.c
+index 5d20449..161dcba 100755
+--- a/drivers/net/ethernet/broadcom/bnx2.c
++++ b/drivers/net/ethernet/broadcom/bnx2.c
+@@ -2869,7 +2869,7 @@ bnx2_tx_int(struct bnx2 *bp, struct bnx2_napi *bnapi, int budget)
+ 		sw_cons = BNX2_NEXT_TX_BD(sw_cons);
+ 
+ 		tx_bytes += skb->len;
+-		dev_kfree_skb(skb);
++		dev_kfree_skb_any(skb);
+ 		tx_pkt++;
+ 		if (tx_pkt == budget)
+ 			break;
+@@ -6610,7 +6610,7 @@ bnx2_start_xmit(struct sk_buff *skb, struct net_device *dev)
+ 
+ 	mapping = dma_map_single(&bp->pdev->dev, skb->data, len, PCI_DMA_TODEVICE);
+ 	if (dma_mapping_error(&bp->pdev->dev, mapping)) {
+-		dev_kfree_skb(skb);
++		dev_kfree_skb_any(skb);
+ 		return NETDEV_TX_OK;
+ 	}
+ 
+@@ -6703,7 +6703,7 @@ dma_error:
+ 			       PCI_DMA_TODEVICE);
+ 	}
+ 
+-	dev_kfree_skb(skb);
++	dev_kfree_skb_any(skb);
+ 	return NETDEV_TX_OK;
+ }
+ 
+-- 
+2.7.4
+

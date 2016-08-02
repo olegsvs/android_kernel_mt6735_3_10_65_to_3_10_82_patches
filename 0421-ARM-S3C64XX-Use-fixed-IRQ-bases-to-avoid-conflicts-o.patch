@@ -1,0 +1,51 @@
+From 00f082afe417063a7052d227af6dc7368df738c7 Mon Sep 17 00:00:00 2001
+From: Charles Keepax <ckeepax@opensource.wolfsonmicro.com>
+Date: Fri, 27 Mar 2015 01:58:08 +0900
+Subject: [PATCH 0421/1168] ARM: S3C64XX: Use fixed IRQ bases to avoid
+ conflicts on Cragganmore
+
+commit 4e330ae4ab2915444f1e6dca1358a910aa259362 upstream.
+
+There are two PMICs on Cragganmore, currently one dynamically assign
+its IRQ base and the other uses a fixed base. It is possible for the
+statically assigned PMIC to fail if its IRQ is taken by the dynamically
+assigned one. Fix this by statically assigning both the IRQ bases.
+
+Signed-off-by: Charles Keepax <ckeepax@opensource.wolfsonmicro.com>
+Signed-off-by: Kukjin Kim <kgene@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 8a53ac7dc8fe5a3cc29f128b1dd2f20ba448aaba
+---
+ arch/arm/mach-s3c64xx/crag6410.h      | 1 +
+ arch/arm/mach-s3c64xx/mach-crag6410.c | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/arch/arm/mach-s3c64xx/crag6410.h b/arch/arm/mach-s3c64xx/crag6410.h
+index 4c3c999..81dc722 100644
+--- a/arch/arm/mach-s3c64xx/crag6410.h
++++ b/arch/arm/mach-s3c64xx/crag6410.h
+@@ -14,6 +14,7 @@
+ #include <linux/gpio.h>
+ 
+ #define GLENFARCLAS_PMIC_IRQ_BASE	IRQ_BOARD_START
++#define BANFF_PMIC_IRQ_BASE		(IRQ_BOARD_START + 64)
+ 
+ #define PCA935X_GPIO_BASE		GPIO_BOARD_START
+ #define CODEC_GPIO_BASE			(GPIO_BOARD_START + 8)
+diff --git a/arch/arm/mach-s3c64xx/mach-crag6410.c b/arch/arm/mach-s3c64xx/mach-crag6410.c
+index 8ad88ac..5fa9ac9 100644
+--- a/arch/arm/mach-s3c64xx/mach-crag6410.c
++++ b/arch/arm/mach-s3c64xx/mach-crag6410.c
+@@ -558,6 +558,7 @@ static struct wm831x_touch_pdata touch_pdata = {
+ 
+ static struct wm831x_pdata crag_pmic_pdata = {
+ 	.wm831x_num = 1,
++	.irq_base = BANFF_PMIC_IRQ_BASE,
+ 	.gpio_base = BANFF_PMIC_GPIO_BASE,
+ 	.soft_shutdown = true,
+ 
+-- 
+2.7.4
+

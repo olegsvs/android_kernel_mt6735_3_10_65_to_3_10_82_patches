@@ -1,0 +1,25 @@
+From a04b2caf947e319b26001ddba085564569ef3cab Mon Sep 17 00:00:00 2001
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date: Wed, 29 Apr 2015 10:34:22 +0200
+Subject: [PATCH 0405/1168] Linux 3.10.76
+
+Former-commit-id: f15f0f777081a7581312f5b2239d404c578e91ce
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index ef87a34..341da23 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,6 @@
+ VERSION = 3
+ PATCHLEVEL = 10
+-SUBLEVEL = 75
++SUBLEVEL = 76
+ EXTRAVERSION =
+ NAME = TOSSUG Baby Fish
+ 
+-- 
+2.7.4
+

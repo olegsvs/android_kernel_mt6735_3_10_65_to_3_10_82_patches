@@ -1,0 +1,43 @@
+From 74d6b5e55951590ad51c8250b3c5fb1b0ebfead7 Mon Sep 17 00:00:00 2001
+From: Brian Norris <computersforpeace@gmail.com>
+Date: Sat, 28 Feb 2015 02:23:27 -0800
+Subject: [PATCH 0445/1168] UBI: initialize LEB number variable
+
+commit f16db8071ce18819fbd705ddcc91c6f392fb61f8 upstream.
+
+In some of the 'out_not_moved' error paths, lnum may be used
+uninitialized. Don't ignore the warning; let's fix it.
+
+This uninitialized variable doesn't have much visible effect in the end,
+since we just schedule the PEB for erasure, and its LEB number doesn't
+really matter (it just gets printed in debug messages). But let's get it
+straight anyway.
+
+Coverity CID #113449
+
+Signed-off-by: Brian Norris <computersforpeace@gmail.com>
+Signed-off-by: Richard Weinberger <richard@nod.at>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 9122e17f34ed2e865cb8a4287305e80282d3d913
+---
+ drivers/mtd/ubi/wl.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mtd/ubi/wl.c b/drivers/mtd/ubi/wl.c
+index 890890d..67383c3 100755
+--- a/drivers/mtd/ubi/wl.c
++++ b/drivers/mtd/ubi/wl.c
+@@ -1015,7 +1015,7 @@ static int wear_leveling_worker(struct ubi_device *ubi, struct ubi_work *wrk,
+ 				int cancel)
+ {
+ 	int erase_e2=1, err, scrubbing = 0, torture = 0, protect = 0, erroneous = 0;
+-	int vol_id = -1, uninitialized_var(lnum);
++	int vol_id = -1, lnum = -1;
+ #ifdef CONFIG_MTD_UBI_FASTMAP
+ 	int anchor = wrk->anchor;
+ #endif
+-- 
+2.7.4
+

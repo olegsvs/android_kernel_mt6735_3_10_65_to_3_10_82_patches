@@ -1,0 +1,35 @@
+From fdb5db23f663d459cf173cbb815dc4f3ad9b4c4c Mon Sep 17 00:00:00 2001
+From: Dmitry Voytik <voytikd@gmail.com>
+Date: Thu, 6 Nov 2014 22:46:20 +0400
+Subject: [PATCH 0039/1168] ARM: imx6q: drop unnecessary semicolon
+
+commit d2a10a1727b3948019128e83162f22c65859f1fd upstream.
+
+Drop unnecessary semicolon after closing curly bracket.
+
+Signed-off-by: Dmitry Voytik <voytikd@gmail.com>
+Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 00705eb09ffe3dd7584d3a7b8cd8eef13ed92804
+---
+ arch/arm/mach-imx/clk-imx6q.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-imx/clk-imx6q.c b/arch/arm/mach-imx/clk-imx6q.c
+index 0b9e437..a1f5ea9 100644
+--- a/arch/arm/mach-imx/clk-imx6q.c
++++ b/arch/arm/mach-imx/clk-imx6q.c
+@@ -302,7 +302,7 @@ int __init mx6q_clocks_init(void)
+ 		post_div_table[2].div = 1;
+ 		video_div_table[1].div = 1;
+ 		video_div_table[2].div = 1;
+-	};
++	}
+ 
+ 	/*                   type                               name         parent_name  base     div_mask */
+ 	clk[pll1_sys]      = imx_clk_pllv3(IMX_PLLV3_SYS,	"pll1_sys",	"osc", base,        0x7f);
+-- 
+2.7.4
+

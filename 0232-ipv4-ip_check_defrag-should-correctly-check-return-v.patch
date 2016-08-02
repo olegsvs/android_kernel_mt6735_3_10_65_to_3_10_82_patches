@@ -1,0 +1,39 @@
+From fe32390a4ee1b92e238c47802cf317d85e36b6f6 Mon Sep 17 00:00:00 2001
+From: Alexander Drozdov <al.drozdov@gmail.com>
+Date: Tue, 17 Feb 2015 13:33:46 +0300
+Subject: [PATCH 0232/1168] ipv4: ip_check_defrag should correctly check return
+ value of skb_copy_bits
+
+[ Upstream commit fba04a9e0c869498889b6445fd06cbe7da9bb834 ]
+
+skb_copy_bits() returns zero on success and negative value on error,
+so it is needed to invert the condition in ip_check_defrag().
+
+Fixes: 1bf3751ec90c ("ipv4: ip_check_defrag must not modify skb before unsharing")
+Signed-off-by: Alexander Drozdov <al.drozdov@gmail.com>
+Acked-by: Eric Dumazet <edumazet@google.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 6adb3f4b9da97db382086c3946f80000d37ae971
+---
+ net/ipv4/ip_fragment.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/ipv4/ip_fragment.c b/net/ipv4/ip_fragment.c
+index b66910a..5fff3d4 100644
+--- a/net/ipv4/ip_fragment.c
++++ b/net/ipv4/ip_fragment.c
+@@ -683,7 +683,7 @@ struct sk_buff *ip_check_defrag(struct sk_buff *skb, u32 user)
+ 	if (skb->protocol != htons(ETH_P_IP))
+ 		return skb;
+ 
+-	if (!skb_copy_bits(skb, 0, &iph, sizeof(iph)))
++	if (skb_copy_bits(skb, 0, &iph, sizeof(iph)) < 0)
+ 		return skb;
+ 
+ 	if (iph.ihl < 5 || iph.version != 4)
+-- 
+2.7.4
+

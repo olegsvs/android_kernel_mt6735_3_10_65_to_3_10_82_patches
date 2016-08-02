@@ -1,0 +1,43 @@
+From 9340d52d31e8616ae385cad1b3ea65afd5839bc7 Mon Sep 17 00:00:00 2001
+From: Joe Thornber <ejt@redhat.com>
+Date: Fri, 9 Oct 2015 14:03:38 +0100
+Subject: [PATCH 0982/1168] dm cache: fix NULL pointer when switching from
+ cleaner policy
+
+commit 2bffa1503c5c06192eb1459180fac4416575a966 upstream.
+
+The cleaner policy doesn't make use of the per cache block hint space in
+the metadata (unlike the other policies).  When switching from the
+cleaner policy to mq or smq a NULL pointer crash (in dm_tm_new_block)
+was observed.  The crash was caused by bugs in dm-cache-metadata.c
+when trying to skip creation of the hint btree.
+
+The minimal fix is to change hint size for the cleaner policy to 4 bytes
+(only hint size supported).
+
+Signed-off-by: Joe Thornber <ejt@redhat.com>
+Signed-off-by: Mike Snitzer <snitzer@redhat.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: c20ad08d3dc630e2682506b18fb9dd44efab8d45
+---
+ drivers/md/dm-cache-policy-cleaner.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/md/dm-cache-policy-cleaner.c b/drivers/md/dm-cache-policy-cleaner.c
+index b04d1f9..2eca908 100755
+--- a/drivers/md/dm-cache-policy-cleaner.c
++++ b/drivers/md/dm-cache-policy-cleaner.c
+@@ -434,7 +434,7 @@ static struct dm_cache_policy *wb_create(dm_cblock_t cache_size,
+ static struct dm_cache_policy_type wb_policy_type = {
+ 	.name = "cleaner",
+ 	.version = {1, 0, 0},
+-	.hint_size = 0,
++	.hint_size = 4,
+ 	.owner = THIS_MODULE,
+ 	.create = wb_create
+ };
+-- 
+2.7.4
+

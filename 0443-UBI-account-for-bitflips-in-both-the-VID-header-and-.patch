@@ -1,0 +1,40 @@
+From 4d037ec3facb5ecca71c62216fb8d4e5952dc9d7 Mon Sep 17 00:00:00 2001
+From: Brian Norris <computersforpeace@gmail.com>
+Date: Sat, 28 Feb 2015 02:23:25 -0800
+Subject: [PATCH 0443/1168] UBI: account for bitflips in both the VID header
+ and data
+
+commit 8eef7d70f7c6772c3490f410ee2bceab3b543fa1 upstream.
+
+We are completely discarding the earlier value of 'bitflips', which
+could reflect a bitflip found in ubi_io_read_vid_hdr(). Let's use the
+bitwise OR of header and data 'bitflip' statuses instead.
+
+Coverity CID #1226856
+
+Signed-off-by: Brian Norris <computersforpeace@gmail.com>
+Signed-off-by: Richard Weinberger <richard@nod.at>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: fbe9929ef8346b981116f8aa184af67cb0552914
+---
+ drivers/mtd/ubi/attach.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mtd/ubi/attach.c b/drivers/mtd/ubi/attach.c
+index 33bb1e4..d1107a7 100755
+--- a/drivers/mtd/ubi/attach.c
++++ b/drivers/mtd/ubi/attach.c
+@@ -412,7 +412,7 @@ int ubi_compare_lebs(struct ubi_device *ubi, const struct ubi_ainf_peb *aeb,
+ 		second_is_newer = !second_is_newer;
+ 	} else {
+ 		dbg_bld("PEB %d CRC is OK", pnum);
+-		bitflips = !!err;
++		bitflips |= !!err;
+ 	}
+ 	mutex_unlock(&ubi->buf_mutex);
+ 
+-- 
+2.7.4
+

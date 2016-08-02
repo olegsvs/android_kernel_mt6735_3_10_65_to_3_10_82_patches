@@ -1,0 +1,35 @@
+From b25c231594ed62c308c1ec0ad8155bbda9e900b7 Mon Sep 17 00:00:00 2001
+From: Mark Brown <broonie@linaro.org>
+Date: Thu, 18 Jul 2013 22:47:10 +0100
+Subject: [PATCH 0916/1168] ASoC: jack: Use power efficient workqueue
+
+The accessory detect debounce work is not performance sensitive so let
+the scheduler run it wherever is most efficient rather than in a per CPU
+workqueue by using the system power efficient workqueue.
+
+Signed-off-by: Mark Brown <broonie@linaro.org>
+Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
+(cherry picked from commit e6058aaadcd473e5827720dc143af56aabbeecc7)
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: bb1bdf1236bb08de87c8e3cc6adbabd25167fd09
+---
+ sound/soc/soc-jack.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sound/soc/soc-jack.c b/sound/soc/soc-jack.c
+index 0bb5ccc..7aa26b5 100644
+--- a/sound/soc/soc-jack.c
++++ b/sound/soc/soc-jack.c
+@@ -263,7 +263,7 @@ static irqreturn_t gpio_handler(int irq, void *data)
+ 	if (device_may_wakeup(dev))
+ 		pm_wakeup_event(dev, gpio->debounce_time + 50);
+ 
+-	schedule_delayed_work(&gpio->work,
++	queue_delayed_work(system_power_efficient_wq, &gpio->work,
+ 			      msecs_to_jiffies(gpio->debounce_time));
+ 
+ 	return IRQ_HANDLED;
+-- 
+2.7.4
+

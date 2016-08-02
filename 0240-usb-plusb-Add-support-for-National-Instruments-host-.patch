@@ -1,0 +1,40 @@
+From 7275d4ddcc2f9499d672d2e53e476538d3d4c85e Mon Sep 17 00:00:00 2001
+From: Ben Shelton <ben.shelton@ni.com>
+Date: Mon, 16 Feb 2015 13:47:06 -0600
+Subject: [PATCH 0240/1168] usb: plusb: Add support for National Instruments
+ host-to-host cable
+
+[ Upstream commit 42c972a1f390e3bc51ca1e434b7e28764992067f ]
+
+The National Instruments USB Host-to-Host Cable is based on the Prolific
+PL-25A1 chipset.  Add its VID/PID so the plusb driver will recognize it.
+
+Signed-off-by: Ben Shelton <ben.shelton@ni.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 7ae9315cd9e38dd9ab7195859ed653acd2ec187a
+---
+ drivers/net/usb/plusb.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/net/usb/plusb.c b/drivers/net/usb/plusb.c
+index 0fcc8e6..74323e9 100755
+--- a/drivers/net/usb/plusb.c
++++ b/drivers/net/usb/plusb.c
+@@ -136,6 +136,11 @@ static const struct usb_device_id	products [] = {
+ }, {
+ 	USB_DEVICE(0x050d, 0x258a),     /* Belkin F5U258/F5U279 (PL-25A1) */
+ 	.driver_info =  (unsigned long) &prolific_info,
++}, {
++	USB_DEVICE(0x3923, 0x7825),     /* National Instruments USB
++					 * Host-to-Host Cable
++					 */
++	.driver_info =  (unsigned long) &prolific_info,
+ },
+ 
+ 	{ },		// END
+-- 
+2.7.4
+

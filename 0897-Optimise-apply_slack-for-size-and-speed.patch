@@ -1,0 +1,51 @@
+From 36250573e155c89e4ae0026985a77837a454b048 Mon Sep 17 00:00:00 2001
+From: Chinmay V S <chinmay.v.s@pathpartnertech.com>
+Date: Fri, 3 Feb 2012 21:30:50 +0530
+Subject: [PATCH 0897/1168] Optimise apply_slack() for size and speed.
+
+To apply proper slack, the original algorithm used to prepare a mask and
+then apply the mask to obtain the appropriately rounded-off absolute
+time the timer expires.
+
+This patch modifies the masking logic to a bit-shift logic, therby
+reducing the complexity and number of operations. Thus obtaining a minor
+speed-up.
+
+Signed-off-by: Chinmay V S <chinmay.v.s@pathpartnertech.com>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 244a8fe22d7ad15b69047718017cfc54315b66b9
+---
+ kernel/timer.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/kernel/timer.c b/kernel/timer.c
+index f22f8ae..f5bdb1b 100644
+--- a/kernel/timer.c
++++ b/kernel/timer.c
+@@ -805,9 +805,7 @@ EXPORT_SYMBOL(mod_timer_pending);
+  * Algorithm:
+  *   1) calculate the maximum (absolute) time
+  *   2) calculate the highest bit where the expires and new max are different
+- *   3) use this bit to make a mask
+- *   4) use the bitmask to round down the maximum time, so that all last
+- *      bits are zeros
++ *   3) round down the maximum time, so that all the lower bits are zeros
+  */
+ static inline
+ unsigned long apply_slack(struct timer_list *timer, unsigned long expires)
+@@ -831,9 +829,8 @@ unsigned long apply_slack(struct timer_list *timer, unsigned long expires)
+ 
+ 	bit = find_last_bit(&mask, BITS_PER_LONG);
+ 
+-	mask = (1UL << bit) - 1;
+-
+-	expires_limit = expires_limit & ~(mask);
++	/* Round down by zero-ing the lower bits */
++	expires_limit = (expires_limit >> bit) << bit;
+ 
+ 	return expires_limit;
+ }
+-- 
+2.7.4
+

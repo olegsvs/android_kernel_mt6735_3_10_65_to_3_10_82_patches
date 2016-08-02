@@ -1,0 +1,55 @@
+From d229b7cc8e2c2c343d06e2107abb7e87346bde3e Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Tue, 10 May 2016 21:47:04 +0300
+Subject: [PATCH 1091/1168] fix pocketmod to two alsps
+
+---
+ drivers/misc/pocket_mod.c  | 8 ++++++++
+ include/linux/pocket_mod.h | 7 +++++--
+ 2 files changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/misc/pocket_mod.c b/drivers/misc/pocket_mod.c
+index feaf04f..5ac5a71 100644
+--- a/drivers/misc/pocket_mod.c
++++ b/drivers/misc/pocket_mod.c
+@@ -47,10 +47,18 @@ int device_is_pocketed(void) {
+ 
+ 	if (!(is_screen_on)) {
+ 		if (pocket_mod_switch) {
++#ifdef CONFIG_MTK_STK3X1X_DRIVER
+ 			if (stk3x1x_pocket_detection_check() == 1)
+ 				return 0;
+ 			else
+ 				return 1;
++#endif
++#ifdef CONFIG_MTK_EPL2182_NEW
++			if (epl2182_pocket_detection_check() == 1)
++				return 0;
++			else
++				return 1;
++#endif
+ 			}
+ 		}
+ 
+diff --git a/include/linux/pocket_mod.h b/include/linux/pocket_mod.h
+index 4e669dc..9756f40 100644
+--- a/include/linux/pocket_mod.h
++++ b/include/linux/pocket_mod.h
+@@ -3,9 +3,12 @@
+ #define _LINUX_POCKET_MOD_H
+ 
+ extern int is_screen_on;
+-
++#ifdef CONFIG_MTK_STK3X1X_DRIVER
+ int stk3x1x_pocket_detection_check(void);
+-
++#endif
++#ifdef CONFIG_MTK_epl2182_NEW
++int epl2182_pocket_detection_check(void);
++#endif
+ int device_is_pocketed(void);
+ 
+ #endif //_LINUX_POCKET_MOD_H
+-- 
+2.7.4
+

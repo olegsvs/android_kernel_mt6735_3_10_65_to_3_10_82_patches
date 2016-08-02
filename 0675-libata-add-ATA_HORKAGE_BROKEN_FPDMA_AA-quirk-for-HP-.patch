@@ -1,0 +1,46 @@
+From 9e82a2184efd7edd9b756f22887c978f64db812e Mon Sep 17 00:00:00 2001
+From: Aleksei Mamlin <mamlinav@gmail.com>
+Date: Wed, 1 Jul 2015 13:48:30 +0300
+Subject: [PATCH 0675/1168] libata: add ATA_HORKAGE_BROKEN_FPDMA_AA quirk for
+ HP 250GB SATA disk VB0250EAVER
+
+commit 08c85d2a599d967ede38a847f5594447b6100642 upstream.
+
+Enabling AA on HP 250GB SATA disk VB0250EAVER causes errors:
+
+[    3.788362] ata3.00: failed to enable AA (error_mask=0x1)
+[    3.789243] ata3.00: failed to enable AA (error_mask=0x1)
+
+Add the ATA_HORKAGE_BROKEN_FPDMA_AA for this specific harddisk.
+
+tj: Collected FPDMA_AA entries and updated comment.
+
+Signed-off-by: Aleksei Mamlin <mamlinav@gmail.com>
+Signed-off-by: Tejun Heo <tj@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 517964c934d8573571c84d85f2aa7dd1f7b19113
+---
+ drivers/ata/libata-core.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/ata/libata-core.c b/drivers/ata/libata-core.c
+index 5d47a04..4284d2b 100755
+--- a/drivers/ata/libata-core.c
++++ b/drivers/ata/libata-core.c
+@@ -4150,9 +4150,10 @@ static const struct ata_blacklist_entry ata_device_blacklist [] = {
+ 	{ "ST3320[68]13AS",	"SD1[5-9]",	ATA_HORKAGE_NONCQ |
+ 						ATA_HORKAGE_FIRMWARE_WARN },
+ 
+-	/* Seagate Momentus SpinPoint M8 seem to have FPMDA_AA issues */
++	/* drives which fail FPDMA_AA activation (some may freeze afterwards) */
+ 	{ "ST1000LM024 HN-M101MBB", "2AR10001",	ATA_HORKAGE_BROKEN_FPDMA_AA },
+ 	{ "ST1000LM024 HN-M101MBB", "2BA30001",	ATA_HORKAGE_BROKEN_FPDMA_AA },
++	{ "VB0250EAVER",	"HPG7",		ATA_HORKAGE_BROKEN_FPDMA_AA },
+ 
+ 	/* Blacklist entries taken from Silicon Image 3124/3132
+ 	   Windows driver .inf file - also several Linux problem reports */
+-- 
+2.7.4
+

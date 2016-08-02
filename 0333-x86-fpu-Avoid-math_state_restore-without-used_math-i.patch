@@ -1,0 +1,93 @@
+From 5792e92ae29e5a656e8d0fe317b42812c0f22b53 Mon Sep 17 00:00:00 2001
+From: Oleg Nesterov <oleg@redhat.com>
+Date: Fri, 13 Mar 2015 09:53:09 +0100
+Subject: [PATCH 0333/1168] x86/fpu: Avoid math_state_restore() without
+ used_math() in __restore_xstate_sig()
+
+commit a7c80ebcac3068b1c3cb27d538d29558c30010c8 upstream.
+
+math_state_restore() assumes it is called with irqs disabled,
+but this is not true if the caller is __restore_xstate_sig().
+
+This means that if ia32_fxstate == T and __copy_from_user()
+fails, __restore_xstate_sig() returns with irqs disabled too.
+
+This triggers:
+
+  BUG: sleeping function called from invalid context at kernel/locking/rwsem.c:41
+   dump_stack
+   ___might_sleep
+   ? _raw_spin_unlock_irqrestore
+   __might_sleep
+   down_read
+   ? _raw_spin_unlock_irqrestore
+   print_vma_addr
+   signal_fault
+   sys32_rt_sigreturn
+
+Change __restore_xstate_sig() to call set_used_math()
+unconditionally. This avoids enabling and disabling interrupts
+in math_state_restore(). If copy_from_user() fails, we can
+simply do fpu_finit() by hand.
+
+[ Note: this is only the first step. math_state_restore() should
+        not check used_math(), it should set this flag. While
+	init_fpu() should simply die. ]
+
+Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+Signed-off-by: Borislav Petkov <bp@suse.de>
+Cc: Andy Lutomirski <luto@amacapital.net>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Dave Hansen <dave.hansen@intel.com>
+Cc: Fenghua Yu <fenghua.yu@intel.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Pekka Riikonen <priikone@iki.fi>
+Cc: Quentin Casasnovas <quentin.casasnovas@oracle.com>
+Cc: Rik van Riel <riel@redhat.com>
+Cc: Suresh Siddha <sbsiddha@gmail.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Link: http://lkml.kernel.org/r/20150307153844.GB25954@redhat.com
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 04949aa53f74f62c5ce31e5ea2e0ef832fad0b01
+---
+ arch/x86/kernel/xsave.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/arch/x86/kernel/xsave.c b/arch/x86/kernel/xsave.c
+index 1ee7232..92f37e7 100644
+--- a/arch/x86/kernel/xsave.c
++++ b/arch/x86/kernel/xsave.c
+@@ -376,7 +376,7 @@ int __restore_xstate_sig(void __user *buf, void __user *buf_fx, int size)
+ 		 * thread's fpu state, reconstruct fxstate from the fsave
+ 		 * header. Sanitize the copied state etc.
+ 		 */
+-		struct xsave_struct *xsave = &tsk->thread.fpu.state->xsave;
++		struct fpu *fpu = &tsk->thread.fpu;
+ 		struct user_i387_ia32_struct env;
+ 		int err = 0;
+ 
+@@ -390,14 +390,15 @@ int __restore_xstate_sig(void __user *buf, void __user *buf_fx, int size)
+ 		 */
+ 		drop_fpu(tsk);
+ 
+-		if (__copy_from_user(xsave, buf_fx, state_size) ||
++		if (__copy_from_user(&fpu->state->xsave, buf_fx, state_size) ||
+ 		    __copy_from_user(&env, buf, sizeof(env))) {
++			fpu_finit(fpu);
+ 			err = -1;
+ 		} else {
+ 			sanitize_restored_xstate(tsk, &env, xstate_bv, fx_only);
+-			set_used_math();
+ 		}
+ 
++		set_used_math();
+ 		if (use_eager_fpu()) {
+ 			preempt_disable();
+ 			math_state_restore();
+-- 
+2.7.4
+

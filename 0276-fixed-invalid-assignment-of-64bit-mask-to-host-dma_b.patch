@@ -1,0 +1,40 @@
+From 108fa50ea5dbc89ee6316755ed8683ad7ca25da2 Mon Sep 17 00:00:00 2001
+From: Minh Duc Tran <MinhDuc.Tran@Emulex.Com>
+Date: Mon, 9 Feb 2015 18:54:09 +0000
+Subject: [PATCH 0276/1168] fixed invalid assignment of 64bit mask to host
+ dma_boundary for scatter gather segment boundary limit.
+
+commit f76a610a8b4b6280eaedf48f3af9d5d74e418b66 upstream.
+
+In reference to bug https://bugzilla.redhat.com/show_bug.cgi?id=1097141
+Assert is seen with AMD cpu whenever calling pci_alloc_consistent.
+
+[   29.406183] ------------[ cut here ]------------
+[   29.410505] kernel BUG at lib/iommu-helper.c:13!
+
+Signed-off-by: Minh Tran <minh.tran@emulex.com>
+Fixes: 6733b39a1301b0b020bbcbf3295852e93e624cb1
+Signed-off-by: James Bottomley <JBottomley@Parallels.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 68662b673820bb83aa58f22702eb625df73309dc
+---
+ drivers/scsi/be2iscsi/be_main.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/scsi/be2iscsi/be_main.c b/drivers/scsi/be2iscsi/be_main.c
+index d24a286..1ad39c7 100755
+--- a/drivers/scsi/be2iscsi/be_main.c
++++ b/drivers/scsi/be2iscsi/be_main.c
+@@ -564,7 +564,6 @@ static struct beiscsi_hba *beiscsi_hba_alloc(struct pci_dev *pcidev)
+ 			"beiscsi_hba_alloc - iscsi_host_alloc failed\n");
+ 		return NULL;
+ 	}
+-	shost->dma_boundary = pcidev->dma_mask;
+ 	shost->max_id = BE2_MAX_SESSIONS;
+ 	shost->max_channel = 0;
+ 	shost->max_cmd_len = BEISCSI_MAX_CMD_LEN;
+-- 
+2.7.4
+

@@ -1,0 +1,36 @@
+From 4ae57160a81f24b9b79b04ee1de3fb823044e419 Mon Sep 17 00:00:00 2001
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Date: Tue, 9 Jun 2015 20:09:42 +0000
+Subject: [PATCH 0646/1168] regulator: core: fix constraints output buffer
+
+commit a7068e3932eee8268c4ce4e080a338ee7b8a27bf upstream.
+
+The buffer for condtraints debug isn't big enough to hold the output
+in all cases. So fix this issue by increasing the buffer.
+
+Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: bb1552a5b9c022bd917283ca3590ae1cc5a86173
+---
+ drivers/regulator/core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+index 283212a..70ccc20 100755
+--- a/drivers/regulator/core.c
++++ b/drivers/regulator/core.c
+@@ -769,7 +769,7 @@ static int suspend_prepare(struct regulator_dev *rdev, suspend_state_t state)
+ static void print_constraints(struct regulator_dev *rdev)
+ {
+ 	struct regulation_constraints *constraints = rdev->constraints;
+-	char buf[80] = "";
++	char buf[160] = "";
+ 	int count = 0;
+ 	int ret;
+ 
+-- 
+2.7.4
+

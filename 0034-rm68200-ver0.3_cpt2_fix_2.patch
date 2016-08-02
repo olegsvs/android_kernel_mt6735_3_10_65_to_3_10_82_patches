@@ -1,0 +1,64 @@
+From aa123158508a58c424c75239e0a34c2efb267203 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Mon, 9 May 2016 22:17:46 +0300
+Subject: [PATCH 034/117] rm68200 ver0.3_cpt2_fix_2
+
+---
+ .../rm68200_6735_dsi_video.c                       | 27 ++++++++++++++--------
+ 1 file changed, 17 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c b/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c
+index 2523c35..76dad19 100644
+--- a/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c
+@@ -67,21 +67,28 @@
+ *  THE RULES OF THE INTERNATIONAL CHAMBER OF COMMERCE (ICC).
+ *
+ *****************************************************************************/
+-#ifndef BUILD_LK
++
++
++#ifdef BUILD_LK
++#else
+ #include <linux/string.h>
++#if defined(BUILD_UBOOT)
++#include <asm/arch/mt_gpio.h>
++#else
++#include <mach/mt_gpio.h>
++#endif
+ #endif
+-
+ #include "lcm_drv.h"
+ 
+-#ifdef BUILD_LK
+-	#include <platform/mt_gpio.h>
+-	#include <string.h>
+-#elif defined(BUILD_UBOOT)
+-	#include <asm/arch/mt_gpio.h>
++#define test "rm68200 ver0.3"
++
++#if defined(BUILD_LK)
+ #else
+-//	#include <mach/mt_gpio.h>
++
++#include <linux/proc_fs.h>   //proc file use 
+ #endif
+ 
++
+ // ---------------------------------------------------------------------------
+ //  Local Constants
+ // ---------------------------------------------------------------------------
+@@ -90,8 +97,8 @@
+ #define FRAME_HEIGHT 										(1280)
+ #define LCM_ID                       						(0x1284)
+ 
+-#define REGFLAG_DELAY             							(0XFFFE)
+-#define REGFLAG_END_OF_TABLE      							(0xFFFF)	// END OF REGISTERS MARKER
++#define REGFLAG_DELAY             							(0XEE)
++#define REGFLAG_END_OF_TABLE      							(0xDD00)	// END OF REGISTERS MARKER
+ 
+ 
+ #define LCM_DSI_CMD_MODE									0
+-- 
+2.7.4
+

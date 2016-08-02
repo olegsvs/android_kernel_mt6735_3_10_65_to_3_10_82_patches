@@ -1,0 +1,44 @@
+From 9c78b279b56d480f18f611b6afc399f5bb7ef376 Mon Sep 17 00:00:00 2001
+From: Alex Deucher <alexander.deucher@amd.com>
+Date: Wed, 10 Dec 2014 09:42:10 -0500
+Subject: [PATCH 0011/1168] drm/radeon: properly filter DP1.2 4k modes on
+ non-DP1.2 hw
+
+commit 410cce2a6b82299b46ff316c6384e789ce275ecb upstream.
+
+The check was already in place in the dp mode_valid check, but
+radeon_dp_get_dp_link_clock() never returned the high clock
+mode_valid was checking for because that function clipped the
+clock based on the hw capabilities.  Add an explicit check
+in the mode_valid function.
+
+bug:
+https://bugs.freedesktop.org/show_bug.cgi?id=87172
+
+Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 940b43a89ccd05655b9e8385385e868428aaf760
+---
+ drivers/gpu/drm/radeon/atombios_dp.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/gpu/drm/radeon/atombios_dp.c b/drivers/gpu/drm/radeon/atombios_dp.c
+index 4c05f2b..d4a5118 100755
+--- a/drivers/gpu/drm/radeon/atombios_dp.c
++++ b/drivers/gpu/drm/radeon/atombios_dp.c
+@@ -574,6 +574,10 @@ int radeon_dp_mode_valid_helper(struct drm_connector *connector,
+ 	struct radeon_connector_atom_dig *dig_connector;
+ 	int dp_clock;
+ 
++	if ((mode->clock > 340000) &&
++	    (!radeon_connector_is_dp12_capable(connector)))
++		return MODE_CLOCK_HIGH;
++
+ 	if (!radeon_connector->con_priv)
+ 		return MODE_CLOCK_HIGH;
+ 	dig_connector = radeon_connector->con_priv;
+-- 
+2.7.4
+

@@ -1,0 +1,67 @@
+From 125586ccd56f1d7c268c799df83cb128c9d44630 Mon Sep 17 00:00:00 2001
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Thu, 9 Jul 2015 11:20:01 -0700
+Subject: [PATCH 0722/1168] Fix firmware loader uevent buffer NULL pointer
+ dereference
+
+commit 6f957724b94cb19f5c1c97efd01dd4df8ced323c upstream.
+
+The firmware class uevent function accessed the "fw_priv->buf" buffer
+without the proper locking and testing for NULL.  This is an old bug
+(looks like it goes back to 2012 and commit 1244691c73b2: "firmware
+loader: introduce firmware_buf"), but for some reason it's triggering
+only now in 4.2-rc1.
+
+Shuah Khan is trying to bisect what it is that causes this to trigger
+more easily, but in the meantime let's just fix the bug since others are
+hitting it too (at least Ingo reports having seen it as well).
+
+Reported-and-tested-by: Shuah Khan <shuahkh@osg.samsung.com>
+Acked-by: Ming Lei <ming.lei@canonical.com>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: fd5ca33d41e8fcd0141fd3253448eb4cd68fcf0f
+---
+ drivers/base/firmware_class.c | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/base/firmware_class.c b/drivers/base/firmware_class.c
+index 9cf8dc7..30d575a 100755
+--- a/drivers/base/firmware_class.c
++++ b/drivers/base/firmware_class.c
+@@ -543,10 +543,8 @@ static void fw_dev_release(struct device *dev)
+ 	module_put(THIS_MODULE);
+ }
+ 
+-static int firmware_uevent(struct device *dev, struct kobj_uevent_env *env)
++static int do_firmware_uevent(struct firmware_priv *fw_priv, struct kobj_uevent_env *env)
+ {
+-	struct firmware_priv *fw_priv = to_firmware_priv(dev);
+-
+ 	if (add_uevent_var(env, "FIRMWARE=%s", fw_priv->buf->fw_id))
+ 		return -ENOMEM;
+ 	if (add_uevent_var(env, "TIMEOUT=%i", loading_timeout))
+@@ -557,6 +555,18 @@ static int firmware_uevent(struct device *dev, struct kobj_uevent_env *env)
+ 	return 0;
+ }
+ 
++static int firmware_uevent(struct device *dev, struct kobj_uevent_env *env)
++{
++	struct firmware_priv *fw_priv = to_firmware_priv(dev);
++	int err = 0;
++
++	mutex_lock(&fw_lock);
++	if (fw_priv->buf)
++		err = do_firmware_uevent(fw_priv, env);
++	mutex_unlock(&fw_lock);
++	return err;
++}
++
+ static struct class firmware_class = {
+ 	.name		= "firmware",
+ 	.class_attrs	= firmware_class_attrs,
+-- 
+2.7.4
+

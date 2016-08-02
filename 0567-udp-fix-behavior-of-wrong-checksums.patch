@@ -1,0 +1,71 @@
+From eb9d67c8980f0fd0e55b03a53b24b90ffe4dc2a9 Mon Sep 17 00:00:00 2001
+From: Eric Dumazet <edumazet@google.com>
+Date: Sat, 30 May 2015 09:16:53 -0700
+Subject: [PATCH 0567/1168] udp: fix behavior of wrong checksums
+
+[ Upstream commit beb39db59d14990e401e235faf66a6b9b31240b0 ]
+
+We have two problems in UDP stack related to bogus checksums :
+
+1) We return -EAGAIN to application even if receive queue is not empty.
+   This breaks applications using edge trigger epoll()
+
+2) Under UDP flood, we can loop forever without yielding to other
+   processes, potentially hanging the host, especially on non SMP.
+
+This patch is an attempt to make things better.
+
+We might in the future add extra support for rt applications
+wanting to better control time spent doing a recv() in a hostile
+environment. For example we could validate checksums before queuing
+packets in socket receive queue.
+
+Signed-off-by: Eric Dumazet <edumazet@google.com>
+Cc: Willem de Bruijn <willemb@google.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: cb3c6227cc6322ed2b3320337a1783a5f2f2df12
+---
+ net/ipv4/udp.c | 6 ++----
+ net/ipv6/udp.c | 6 ++----
+ 2 files changed, 4 insertions(+), 8 deletions(-)
+
+diff --git a/net/ipv4/udp.c b/net/ipv4/udp.c
+index dee3698..2c9443c 100644
+--- a/net/ipv4/udp.c
++++ b/net/ipv4/udp.c
+@@ -1334,10 +1334,8 @@ csum_copy_err:
+ 	}
+ 	unlock_sock_fast(sk, slow);
+ 
+-	if (noblock)
+-		return -EAGAIN;
+-
+-	/* starting over for a new packet */
++	/* starting over for a new packet, but check if we need to yield */
++	cond_resched();
+ 	msg->msg_flags &= ~MSG_TRUNC;
+ 	goto try_again;
+ }
+diff --git a/net/ipv6/udp.c b/net/ipv6/udp.c
+index d84a8c7..ef52ec9 100644
+--- a/net/ipv6/udp.c
++++ b/net/ipv6/udp.c
+@@ -494,10 +494,8 @@ csum_copy_err:
+ 	}
+ 	unlock_sock_fast(sk, slow);
+ 
+-	if (noblock)
+-		return -EAGAIN;
+-
+-	/* starting over for a new packet */
++	/* starting over for a new packet, but check if we need to yield */
++	cond_resched();
+ 	msg->msg_flags &= ~MSG_TRUNC;
+ 	goto try_again;
+ }
+-- 
+2.7.4
+

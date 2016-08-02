@@ -1,0 +1,80 @@
+From d3743a5ed330e126a95c7c749bafb7f4a5ed2b87 Mon Sep 17 00:00:00 2001
+From: Mark Salyzyn <salyzyn@android.com>
+Date: Tue, 26 May 2015 08:22:19 -0700
+Subject: [PATCH 0565/1168] unix/caif: sk_socket can disappear when state is
+ unlocked
+
+[ Upstream commit b48732e4a48d80ed4a14812f0bab09560846514e ]
+
+got a rare NULL pointer dereference in clear_bit
+
+Signed-off-by: Mark Salyzyn <salyzyn@android.com>
+Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+----
+v2: switch to sock_flag(sk, SOCK_DEAD) and added net/caif/caif_socket.c
+v3: return -ECONNRESET in upstream caller of wait function for SOCK_DEAD
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 3e5f222659de9bfe266a7bb06e1c55113e6c6b84
+---
+ net/caif/caif_socket.c | 8 ++++++++
+ net/unix/af_unix.c     | 8 ++++++++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/net/caif/caif_socket.c b/net/caif/caif_socket.c
+index 526bf56..afeb8e0 100644
+--- a/net/caif/caif_socket.c
++++ b/net/caif/caif_socket.c
+@@ -332,6 +332,10 @@ static long caif_stream_data_wait(struct sock *sk, long timeo)
+ 		release_sock(sk);
+ 		timeo = schedule_timeout(timeo);
+ 		lock_sock(sk);
++
++		if (sock_flag(sk, SOCK_DEAD))
++			break;
++
+ 		clear_bit(SOCK_ASYNC_WAITDATA, &sk->sk_socket->flags);
+ 	}
+ 
+@@ -376,6 +380,10 @@ static int caif_stream_recvmsg(struct kiocb *iocb, struct socket *sock,
+ 		struct sk_buff *skb;
+ 
+ 		lock_sock(sk);
++		if (sock_flag(sk, SOCK_DEAD)) {
++			err = -ECONNRESET;
++			goto unlock;
++		}
+ 		skb = skb_dequeue(&sk->sk_receive_queue);
+ 		caif_check_flow_release(sk);
+ 
+diff --git a/net/unix/af_unix.c b/net/unix/af_unix.c
+index b7ac906..f76a6bf 100644
+--- a/net/unix/af_unix.c
++++ b/net/unix/af_unix.c
+@@ -1978,6 +1978,10 @@ static long unix_stream_data_wait(struct sock *sk, long timeo,
+ 		unix_state_unlock(sk);
+ 		timeo = freezable_schedule_timeout(timeo);
+ 		unix_state_lock(sk);
++
++		if (sock_flag(sk, SOCK_DEAD))
++			break;
++
+ 		clear_bit(SOCK_ASYNC_WAITDATA, &sk->sk_socket->flags);
+ 	}
+ 
+@@ -2038,6 +2042,10 @@ static int unix_stream_recvmsg(struct kiocb *iocb, struct socket *sock,
+ 		struct sk_buff *skb, *last;
+ 
+ 		unix_state_lock(sk);
++		if (sock_flag(sk, SOCK_DEAD)) {
++			err = -ECONNRESET;
++			goto unlock;
++		}
+ 		last = skb = skb_peek(&sk->sk_receive_queue);
+ again:
+ 		if (skb == NULL) {
+-- 
+2.7.4
+

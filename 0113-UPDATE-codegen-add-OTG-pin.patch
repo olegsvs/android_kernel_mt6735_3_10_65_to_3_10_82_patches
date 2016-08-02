@@ -1,0 +1,25 @@
+From ef4e21f5299c23af4701e88aa283561b77e13b25 Mon Sep 17 00:00:00 2001
+From: SnowCatPDA <snowcat@vpro.ru>
+Date: Sat, 28 May 2016 16:57:06 +0500
+Subject: [PATCH 113/117] UPDATE codegen add OTG pin
+
+---
+ .../mach/mt6735/X5PRO_6735m/dct/dct/codegen.dws     | Bin 29759 -> 29759 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/dct/dct/codegen.dws b/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/dct/dct/codegen.dws
+index 1d716cc05c96d3dbfff77f4488cb487a459f7b1f..d39d2b1c83fd99076ec93089783b500c941495e3 100644
+GIT binary patch
+delta 138
+zcmdo0f^q)~#tpL+CkuG0Op=qB-0i3^d7lE`W(lQimdUde)h8#2^Gt5g5!gIWm4j(=
+z0t?IJ0yCD$cZ>uk7qD<l=4a%X%&99g(Sc?12WFAU2F4PTCwQ<-?$gYfd|rlQvVfNZ
+dnEy{JWU_$=2a>o3)F__G3ye87|I%{x1OVxAFB$*<
+
+delta 147
+zcmdo0f^q)~#tpL+C+DlFPi~M^oGc*6F}d4OVe&o&zRfI3*({sytKDXt+~6rP*}<4)
+z@&q%M$#KdKlM`52CKmwNcZ>uk7qD<l=4a%X%&99g(Sc?12WFAU2F4PTCwQ<-?$gYf
+ld|rlQvVfNZnEy{JWU_$=2a>o3)F__G3ye87|I%{x1ONkEGW-Al
+
+-- 
+2.7.4
+

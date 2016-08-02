@@ -1,0 +1,35 @@
+From 75df9d16663346af5c93fad0d6529a7cde7b9a46 Mon Sep 17 00:00:00 2001
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Fri, 17 May 2013 11:04:44 +0200
+Subject: [PATCH 0437/1168] console: Disable VGA text console support on cris
+
+commit 3535629264e69ddbec0bd44b6f9a119947fbe4e2 upstream.
+
+Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Guenter Roeck <linux@roeck-us.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: ce7dc712fcfc5f4e0efd28b7faaf60f4b5217b7d
+---
+ drivers/video/console/Kconfig | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/video/console/Kconfig b/drivers/video/console/Kconfig
+index 48fac16..ac88fed 100755
+--- a/drivers/video/console/Kconfig
++++ b/drivers/video/console/Kconfig
+@@ -7,7 +7,9 @@ menu "Console display driver support"
+ if VT
+ config VGA_CONSOLE
+ 	bool "VGA text console" if EXPERT || !X86
+-	depends on !4xx && !8xx && !SPARC && !M68K && !PARISC && !FRV && !SUPERH && !BLACKFIN && !AVR32 && !MN10300 && (!ARM || ARCH_FOOTBRIDGE || ARCH_INTEGRATOR || ARCH_NETWINDER)
++	depends on !4xx && !8xx && !SPARC && !M68K && !PARISC && !FRV && \
++		!SUPERH && !BLACKFIN && !AVR32 && !MN10300 && !CRIS && \
++		(!ARM || ARCH_FOOTBRIDGE || ARCH_INTEGRATOR || ARCH_NETWINDER)
+ 	default y
+ 	help
+ 	  Saying Y here will allow you to use Linux in text mode through a
+-- 
+2.7.4
+

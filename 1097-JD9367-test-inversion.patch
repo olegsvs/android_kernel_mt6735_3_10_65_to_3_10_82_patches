@@ -1,0 +1,40 @@
+From 29c860ac9f2016ae2738096b728fd7529ddb74e0 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Tue, 10 May 2016 22:48:29 +0300
+Subject: [PATCH 1097/1168] JD9367 test inversion
+
+---
+ .../misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c   | 2 +-
+ include/generated/compile.h                                           | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c b/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c
+index 62e15c4..7f781b3 100644
+--- a/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c
+@@ -188,7 +188,7 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
+ 	{0x26,1,{0xF1}},	//VDDD from IOVCC
+ 
+ 	//SetPanel
+-	{0x37,1,{0x09}},	//05 REVERSE /SS=0,BGR=1,GS=1
++	{0x37,1,{0x05}},	//05 REVERSE /SS=0,BGR=1,GS=1
+ 
+ 	//SET RGBCYC
+ 	{0x38,1,{0x04}},	//JDT=100 column inversion
+diff --git a/include/generated/compile.h b/include/generated/compile.h
+index 481632c..00ca843 100644
+--- a/include/generated/compile.h
++++ b/include/generated/compile.h
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 19 */
++/* This file is auto generated, version 20 */
+ /* SMP PREEMPT */
+ #define UTS_MACHINE "arm64"
+-#define UTS_VERSION "#19 SMP PREEMPT Tue May 10 22:38:57 MSK 2016"
++#define UTS_VERSION "#20 SMP PREEMPT Tue May 10 22:46:34 MSK 2016"
+ #define LINUX_COMPILE_BY "olegsvs"
+ #define LINUX_COMPILE_HOST "olegsvs-develop"
+ #define LINUX_COMPILER "gcc version 4.9 20150123 (prerelease) (GCC) "
+-- 
+2.7.4
+

@@ -1,0 +1,68 @@
+From 0021d8a86a6fed205ee1e0567836a1c1d998fca2 Mon Sep 17 00:00:00 2001
+From: Guojian Chen <a21757@motorola.com>
+Date: Sun, 8 Mar 2015 16:22:13 +0800
+Subject: [PATCH 0883/1168] cpuidle: remove cross-cpu IPI by new latency
+ request. when drivers request new latency requirement, it's not necessary to
+ immediately wake up another cpu by sending cross-cpu IPI, we can consider the
+ new latency to be taken into effect after next wakeup from idle, this can
+ save the unnecessary wakeup cost, and reduce the risk that drivers may
+ request latency in irq disabled context.
+
+[<c08e0cc0>] (__irq_svc+0x40/0x70) from [<c00e801c>] (smp_call_function_single+0x16c/0x240)
+[<c00e801c>] (smp_call_function_single+0x16c/0x240) from [<c00e855c>] (smp_call_function+0x40/0x6c)
+[<c00e855c>] (smp_call_function+0x40/0x6c) from [<c0601c9c>] (cpuidle_latency_notify+0x18/0x20)
+[<c0601c9c>] (cpuidle_latency_notify+0x18/0x20) from [<c00b7c28>] (blocking_notifier_call_chain+0x74/0x94)
+[<c00b7c28>] (blocking_notifier_call_chain+0x74/0x94) from [<c00d563c>] (pm_qos_update_target+0xe0/0x128)
+[<c00d563c>] (pm_qos_update_target+0xe0/0x128) from [<c0620d3c>] (msmsdcc_enable+0xac/0x158)
+[<c0620d3c>] (msmsdcc_enable+0xac/0x158) from [<c06050e0>] (mmc_try_claim_host+0xb0/0xb8)
+[<c06050e0>] (mmc_try_claim_host+0xb0/0xb8) from [<c0605318>] (mmc_start_bkops.part.15+0x50/0x2f4)
+[<c0605318>] (mmc_start_bkops.part.15+0x50/0x2f4) from [<c00ab768>] (process_one_work+0x124/0x55c)
+[<c00ab768>] (process_one_work+0x124/0x55c) from [<c00abfc8>] (worker_thread+0x178/0x45c)
+[<c00abfc8>] (worker_thread+0x178/0x45c) from [<c00b0b24>] (kthread+0x84/0x90)
+[<c00b0b24>] (kthread+0x84/0x90) from [<c000fdd4>] (kernel_thread_exit+0x0/0x8)
+Disabling lock debugging due to kernel taint
+coresight-etb coresight-etb.0: ETB aborted
+Kernel panic - not syncing: softlockup: hung tasks
+
+Signed-off-by: Guojian Chen <a21757@motorola.com>
+Reviewed-on: http://gerrit.pcs.mot.com/532702
+SLT-Approved: Slta Waiver <sltawvr@motorola.com>
+Tested-by: Jira Key <jirakey@motorola.com>
+Reviewed-by: Klocwork kwcheck <klocwork-kwcheck@sourceforge.mot.com>
+Reviewed-by: Christopher Fries <qcf001@motorola.com>
+Reviewed-by: David Ding <dding@motorola.com>
+Submit-Approved: Jira Key <jirakey@motorola.com>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: dd0427a53341b976b9f2f6003556cd7d5e813d53
+---
+ drivers/cpuidle/cpuidle.c | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/drivers/cpuidle/cpuidle.c b/drivers/cpuidle/cpuidle.c
+index 5b11022..0871212 100755
+--- a/drivers/cpuidle/cpuidle.c
++++ b/drivers/cpuidle/cpuidle.c
+@@ -530,11 +530,6 @@ EXPORT_SYMBOL_GPL(cpuidle_register);
+ 
+ #ifdef CONFIG_SMP
+ 
+-static void smp_callback(void *v)
+-{
+-	/* we already woke the CPU up, nothing more to do */
+-}
+-
+ /*
+  * This function gets called when a part of the kernel has a new latency
+  * requirement.  This means we need to get all processors out of their C-state,
+@@ -544,7 +539,6 @@ static void smp_callback(void *v)
+ static int cpuidle_latency_notify(struct notifier_block *b,
+ 		unsigned long l, void *v)
+ {
+-	smp_call_function(smp_callback, NULL, 1);
+ 	return NOTIFY_OK;
+ }
+ 
+-- 
+2.7.4
+

@@ -1,0 +1,41 @@
+From 7b38cb59e7c0dc8c93c1f6cf0583b07d5fe8efc0 Mon Sep 17 00:00:00 2001
+From: "K. Y. Srinivasan" <kys@microsoft.com>
+Date: Mon, 12 Jan 2015 16:26:02 -0800
+Subject: [PATCH 0067/1168] x86, hyperv: Mark the Hyper-V clocksource as being
+ continuous
+
+commit 32c6590d126836a062b3140ed52d898507987017 upstream.
+
+The Hyper-V clocksource is continuous; mark it accordingly.
+
+Signed-off-by: K. Y. Srinivasan <kys@microsoft.com>
+Acked-by: jasowang@redhat.com
+Cc: gregkh@linuxfoundation.org
+Cc: devel@linuxdriverproject.org
+Cc: olaf@aepfle.de
+Cc: apw@canonical.com
+Link: http://lkml.kernel.org/r/1421108762-3331-1-git-send-email-kys@microsoft.com
+Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: af4b1a6015995360e45255c40dcc27af454762ce
+---
+ arch/x86/kernel/cpu/mshyperv.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/x86/kernel/cpu/mshyperv.c b/arch/x86/kernel/cpu/mshyperv.c
+index 8f4be53..1853659 100644
+--- a/arch/x86/kernel/cpu/mshyperv.c
++++ b/arch/x86/kernel/cpu/mshyperv.c
+@@ -60,6 +60,7 @@ static struct clocksource hyperv_cs = {
+ 	.rating		= 400, /* use this when running on Hyperv*/
+ 	.read		= read_hv_clock,
+ 	.mask		= CLOCKSOURCE_MASK(64),
++	.flags		= CLOCK_SOURCE_IS_CONTINUOUS,
+ };
+ 
+ static void __init ms_hyperv_init_platform(void)
+-- 
+2.7.4
+

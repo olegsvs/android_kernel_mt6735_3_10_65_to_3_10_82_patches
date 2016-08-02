@@ -1,0 +1,49 @@
+From 6fea6f091ea78dc64836d731cf6866b623b6faa2 Mon Sep 17 00:00:00 2001
+From: Al Viro <viro@zeniv.linux.org.uk>
+Date: Sun, 12 Jul 2015 10:34:29 -0400
+Subject: [PATCH 0718/1168] 9p: don't leave a half-initialized inode sitting
+ around
+
+commit 0a73d0a204a4a04a1e110539c5a524ae51f91d6d upstream.
+
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 00d0fbef04979091bc5475d9b4ff4a03a57c0101
+---
+ fs/9p/vfs_inode.c      | 3 +--
+ fs/9p/vfs_inode_dotl.c | 3 +--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/fs/9p/vfs_inode.c b/fs/9p/vfs_inode.c
+index d86edc8..4c7d309 100644
+--- a/fs/9p/vfs_inode.c
++++ b/fs/9p/vfs_inode.c
+@@ -537,8 +537,7 @@ static struct inode *v9fs_qid_iget(struct super_block *sb,
+ 	unlock_new_inode(inode);
+ 	return inode;
+ error:
+-	unlock_new_inode(inode);
+-	iput(inode);
++	iget_failed(inode);
+ 	return ERR_PTR(retval);
+ 
+ }
+diff --git a/fs/9p/vfs_inode_dotl.c b/fs/9p/vfs_inode_dotl.c
+index 53687bb..65b21a2 100644
+--- a/fs/9p/vfs_inode_dotl.c
++++ b/fs/9p/vfs_inode_dotl.c
+@@ -151,8 +151,7 @@ static struct inode *v9fs_qid_iget_dotl(struct super_block *sb,
+ 	unlock_new_inode(inode);
+ 	return inode;
+ error:
+-	unlock_new_inode(inode);
+-	iput(inode);
++	iget_failed(inode);
+ 	return ERR_PTR(retval);
+ 
+ }
+-- 
+2.7.4
+

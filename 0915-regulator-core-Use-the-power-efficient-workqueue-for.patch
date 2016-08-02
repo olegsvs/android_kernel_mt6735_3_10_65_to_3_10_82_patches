@@ -1,0 +1,40 @@
+From 1704a9c2bf676b911d671e515b2028008f0e32c5 Mon Sep 17 00:00:00 2001
+From: Mark Brown <broonie@linaro.org>
+Date: Thu, 18 Jul 2013 11:52:04 +0100
+Subject: [PATCH 0915/1168] regulator: core: Use the power efficient workqueue
+ for delayed powerdown
+
+There is no need to use a normal per-CPU workqueue for delayed power downs
+as they're not timing or performance critical and waking up a core for them
+would defeat some of the point.
+
+Signed-off-by: Mark Brown <broonie@linaro.org>
+Reviewed-by: Viresh Kumar <viresh.kumar@linaro.org>
+Acked-by: Liam Girdwood <liam.r.girdwood@intel.com>
+(cherry picked from commit 070260f07c7daec311f2466eb9d1df475d5a46f8)
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 230e897c0e5372bc646ef62aef63b9ad2c9004db
+---
+ drivers/regulator/core.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+index 70ccc20..eaaae30 100755
+--- a/drivers/regulator/core.c
++++ b/drivers/regulator/core.c
+@@ -1893,8 +1893,9 @@ int regulator_disable_deferred(struct regulator *regulator, int ms)
+ 	rdev->deferred_disables++;
+ 	mutex_unlock(&rdev->mutex);
+ 
+-	ret = schedule_delayed_work(&rdev->disable_work,
+-				    msecs_to_jiffies(ms));
++	ret = queue_delayed_work(system_power_efficient_wq,
++				 &rdev->disable_work,
++				 msecs_to_jiffies(ms));
+ 	if (ret < 0)
+ 		return ret;
+ 	else
+-- 
+2.7.4
+

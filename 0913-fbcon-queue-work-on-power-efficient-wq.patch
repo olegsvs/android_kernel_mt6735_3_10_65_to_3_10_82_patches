@@ -1,0 +1,43 @@
+From 1159d711e666db75836dd4e3c4a044c175d6bfa1 Mon Sep 17 00:00:00 2001
+From: Viresh Kumar <viresh.kumar@linaro.org>
+Date: Wed, 24 Apr 2013 17:12:57 +0530
+Subject: [PATCH 0913/1168] fbcon: queue work on power efficient wq
+
+fbcon uses workqueues and it has no real dependency of scheduling these on the
+cpu which scheduled them.
+
+On a idle system, it is observed that and idle cpu wakes up many times just to
+service this work. It would be better if we can schedule it on a cpu which the
+scheduler believes to be the most appropriate one.
+
+This patch replaces system_wq with system_power_efficient_wq.
+
+Cc: Dave Airlie <airlied@redhat.com>
+Cc: linux-fbdev@vger.kernel.org
+Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
+Signed-off-by: Tejun Heo <tj@kernel.org>
+(cherry picked from commit a85f1a41f020bc2c97611060bcfae6f48a1db28d)
+Signed-off-by: Mark Brown <broonie@linaro.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 9ff9343590f7b3270ea160c545e9a6bfbdc299b8
+---
+ drivers/video/console/fbcon.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/video/console/fbcon.c b/drivers/video/console/fbcon.c
+index a92783e..0d8f98c 100755
+--- a/drivers/video/console/fbcon.c
++++ b/drivers/video/console/fbcon.c
+@@ -404,7 +404,7 @@ static void cursor_timer_handler(unsigned long dev_addr)
+ 	struct fb_info *info = (struct fb_info *) dev_addr;
+ 	struct fbcon_ops *ops = info->fbcon_par;
+ 
+-	schedule_work(&info->queue);
++	queue_work(system_power_efficient_wq, &info->queue);
+ 	mod_timer(&ops->cursor_timer, jiffies + HZ/5);
+ }
+ 
+-- 
+2.7.4
+

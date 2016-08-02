@@ -1,0 +1,40 @@
+From cd63ef85e8e1cf96e4066ef387cef8790410f7f8 Mon Sep 17 00:00:00 2001
+From: Frediano Ziglio <fziglio@redhat.com>
+Date: Wed, 3 Jun 2015 12:09:09 +0100
+Subject: [PATCH 0687/1168] drm/qxl: Do not cause spice-server to clean our
+ objects
+
+commit 2fa19535ca6abcbfd1ccc9ef694db52f49f77747 upstream.
+
+If objects are moved back from system memory to VRAM (and spice id
+created again) memory is already initialized so we need to set flag
+to not clear memory.
+If you don't do it after a while using desktop many images turns to
+black or transparents.
+
+Signed-off-by: Frediano Ziglio <fziglio@redhat.com>
+Reviewed-by: Dave Airlie <airlied@redhat.com>
+Signed-off-by: Dave Airlie <airlied@redhat.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: fa00a7bc30320a9a7c1770daed0604f9ec8d9119
+---
+ drivers/gpu/drm/qxl/qxl_cmd.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/gpu/drm/qxl/qxl_cmd.c b/drivers/gpu/drm/qxl/qxl_cmd.c
+index f867714..5a48d74 100755
+--- a/drivers/gpu/drm/qxl/qxl_cmd.c
++++ b/drivers/gpu/drm/qxl/qxl_cmd.c
+@@ -500,6 +500,7 @@ int qxl_hw_surface_alloc(struct qxl_device *qdev,
+ 
+ 	cmd = (struct qxl_surface_cmd *)qxl_release_map(qdev, release);
+ 	cmd->type = QXL_SURFACE_CMD_CREATE;
++	cmd->flags = QXL_SURF_FLAG_KEEP_DATA;
+ 	cmd->u.surface_create.format = surf->surf.format;
+ 	cmd->u.surface_create.width = surf->surf.width;
+ 	cmd->u.surface_create.height = surf->surf.height;
+-- 
+2.7.4
+

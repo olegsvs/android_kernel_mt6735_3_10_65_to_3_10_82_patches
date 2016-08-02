@@ -1,0 +1,49 @@
+From 4007ded11dd618725540967da2b3b0797921d48d Mon Sep 17 00:00:00 2001
+From: Takashi Iwai <tiwai@suse.de>
+Date: Tue, 10 Mar 2015 12:39:12 +0100
+Subject: [PATCH 0354/1168] ASoC: wm8904: Fix wrong value references for
+ boolean kctl
+
+commit eaddf6fd959074f6a6e71deffe079c71eef35da6 upstream.
+
+The correct values referred by a boolean control are
+value.integer.value[], not value.enumerated.item[].
+The former is long while the latter is int, so it's even incompatible
+on 64bit architectures.
+
+Signed-off-by: Takashi Iwai <tiwai@suse.de>
+Acked-by: Charles Keepax <ckeepax@opensource.wolfsonmicro.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: e067506371783cdc0306d835bfc4e12f9c6a47e8
+---
+ sound/soc/codecs/wm8904.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/sound/soc/codecs/wm8904.c b/sound/soc/codecs/wm8904.c
+index af62f84..c68d541 100644
+--- a/sound/soc/codecs/wm8904.c
++++ b/sound/soc/codecs/wm8904.c
+@@ -523,7 +523,7 @@ static int wm8904_get_deemph(struct snd_kcontrol *kcontrol,
+ 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+ 	struct wm8904_priv *wm8904 = snd_soc_codec_get_drvdata(codec);
+ 
+-	ucontrol->value.enumerated.item[0] = wm8904->deemph;
++	ucontrol->value.integer.value[0] = wm8904->deemph;
+ 	return 0;
+ }
+ 
+@@ -532,7 +532,7 @@ static int wm8904_put_deemph(struct snd_kcontrol *kcontrol,
+ {
+ 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+ 	struct wm8904_priv *wm8904 = snd_soc_codec_get_drvdata(codec);
+-	int deemph = ucontrol->value.enumerated.item[0];
++	int deemph = ucontrol->value.integer.value[0];
+ 
+ 	if (deemph > 1)
+ 		return -EINVAL;
+-- 
+2.7.4
+

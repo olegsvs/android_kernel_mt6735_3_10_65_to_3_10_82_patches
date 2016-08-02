@@ -1,0 +1,944 @@
+From aa205a4a9fc4d0da1d63917e8b31bc984ee92a0b Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Tue, 3 May 2016 20:39:07 +0300
+Subject: [PATCH 1044/1168] proximity 1/2
+
+---
+ .gitignore                                         |  36 ++++++++++++
+ arch/arm64/configs/benefit_m7_defconfig            |   5 +-
+ drivers/misc/mediatek/alsps/Makefile               |   4 +-
+ drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.c  |   2 +-
+ .../misc/mediatek/alsps/stk3x1x_driver/stk3x1x.h   |   4 +-
+ .../misc/mediatek/mach/mt6735/benefit_m7/Makefile  |   8 ++-
+ .../mt6735/benefit_m7/alsps/stk3x1x-new/Makefile   |   4 ++
+ .../benefit_m7/alsps/stk3x1x-new/cust_alsps.c      |  62 +++++++++++++++++++++
+ .../mach/mt6735/benefit_m7/dct/dct/codegen.dws     | Bin 29816 -> 29792 bytes
+ .../mach/mt6735/benefit_m7/dct/dct/cust_adc.dtsi   |   2 +-
+ .../mach/mt6735/benefit_m7/dct/dct/cust_adc.h      |   2 +-
+ .../mt6735/benefit_m7/dct/dct/cust_clk_buf.dtsi    |   2 +-
+ .../mach/mt6735/benefit_m7/dct/dct/cust_clk_buf.h  |   2 +-
+ .../mach/mt6735/benefit_m7/dct/dct/cust_eint.dtsi  |   2 +-
+ .../mach/mt6735/benefit_m7/dct/dct/cust_eint.h     |   2 +-
+ .../mach/mt6735/benefit_m7/dct/dct/cust_eint_md1.h |   2 +-
+ .../mach/mt6735/benefit_m7/dct/dct/cust_gpio.dtsi  |  20 +++----
+ .../mt6735/benefit_m7/dct/dct/cust_gpio_boot.h     |  20 +++----
+ .../mt6735/benefit_m7/dct/dct/cust_gpio_usage.h    |  30 +---------
+ .../mach/mt6735/benefit_m7/dct/dct/cust_i2c.dtsi   |  19 ++++---
+ .../mach/mt6735/benefit_m7/dct/dct/cust_i2c.h      |  13 +++--
+ .../mach/mt6735/benefit_m7/dct/dct/cust_kpd.dtsi   |   2 +-
+ .../mach/mt6735/benefit_m7/dct/dct/cust_kpd.h      |   2 +-
+ .../mt6735/benefit_m7/dct/dct/cust_md1_eint.dtsi   |   2 +-
+ .../mach/mt6735/benefit_m7/dct/dct/cust_pmic.dtsi  |   2 +-
+ .../mach/mt6735/benefit_m7/dct/dct/cust_power.h    |   2 +-
+ .../mt6735/benefit_m7/dct/dct/mt6735m-pinfunc.h    |   2 +-
+ .../mt6735/benefit_m7/dct/dct/pinctrl-mtk-mt6735.h |   2 +-
+ .../mach/mt6735/benefit_m7/dct/dct/pmic_drv.c      |   2 +-
+ .../mach/mt6735/benefit_m7/dct/dct/pmic_drv.h      |   2 +-
+ .../benefit_m7/magnetometer/mmc3416x/Makefile      |   4 ++
+ .../benefit_m7/magnetometer/mmc3416x/cust_mag.c    |  16 ++++++
+ .../misc/mediatek/magnetometer/mmc3416x/mmc3416x.c |  54 ++++++------------
+ .../misc/mediatek/magnetometer/mmc3416x/mmc3416x.h |   0
+ 34 files changed, 211 insertions(+), 122 deletions(-)
+ create mode 100644 .gitignore
+ create mode 100644 drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/Makefile
+ create mode 100644 drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/cust_alsps.c
+ create mode 100755 drivers/misc/mediatek/mach/mt6735/benefit_m7/magnetometer/mmc3416x/Makefile
+ create mode 100644 drivers/misc/mediatek/mach/mt6735/benefit_m7/magnetometer/mmc3416x/cust_mag.c
+ mode change 100755 => 100644 drivers/misc/mediatek/magnetometer/mmc3416x/mmc3416x.c
+ mode change 100755 => 100644 drivers/misc/mediatek/magnetometer/mmc3416x/mmc3416x.h
+
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..fd5b59f
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,36 @@
++*.~
++*.old
++*.bak
++*.orig
++
++.*
++*.o
++*.o.*
++
++modules.builtin
++
++*.elf
++*.bin
++*.gz
++*.bz2
++*.lzma
++*.xz
++*.lzo
++*.patch
++*.gcno
++
++/tags
++/TAGS
++/linux
++/vmlinux
++/vmlinuz
++/System.map
++/Module.markers
++/Module.symvers
++
++.gitignore
++!.gitignore
++!.mailmap
++.mailmap
++
++out/
+diff --git a/arch/arm64/configs/benefit_m7_defconfig b/arch/arm64/configs/benefit_m7_defconfig
+index 3217db2..efd9c7e 100644
+--- a/arch/arm64/configs/benefit_m7_defconfig
++++ b/arch/arm64/configs/benefit_m7_defconfig
+@@ -41,7 +41,6 @@ CONFIG_SWAP=y
+ # CONFIG_POSIX_MQUEUE is not set
+ # CONFIG_FHANDLE is not set
+ CONFIG_AUDIT=y
+-CONFIG_AUDIT=y
+ CONFIG_AUDIT_WATCH=y
+ CONFIG_AUDIT_TREE=y
+ CONFIG_AUDITSYSCALL=y
+@@ -1288,8 +1287,8 @@ CONFIG_MTK_SIM2=y
+ # CONFIG_MTK_APM_16D is not set
+ # CONFIG_MTK_EPL2182 is not set
+ # CONFIG_MTK_EPL2182_NEW is not set
+-CONFIG_MTK_STK3X1X_NEW=n
+-CONFIG_MTK_STK3X1X_DRIVER=y
++CONFIG_MTK_STK3X1X_NEW=y
++CONFIG_MTK_STK3X1X_DRIVER=n
+ # CONFIG_MTK_CM36652_NEW is not set
+ # CONFIG_MTK_APDS9930 is not set
+ # CONFIG_MTK_CM3232_NEW is not set
+diff --git a/drivers/misc/mediatek/alsps/Makefile b/drivers/misc/mediatek/alsps/Makefile
+index 7dd9d60..25d507a 100755
+--- a/drivers/misc/mediatek/alsps/Makefile
++++ b/drivers/misc/mediatek/alsps/Makefile
+@@ -42,8 +42,8 @@ endif
+ ifeq ($(CONFIG_MTK_APDS9930_NEW),y)
+ obj-y	+=  APDS9930-new/
+ endif
+-ifeq ($(CONFIG_MTK_STK3X1X_DRIVER),y)
+-obj-y	+=  stk3x1x_driver/
++ifeq ($(CONFIG_MTK_STK3X1X_NEW),y)
++obj-y	+=  stk3x1x-new/
+ endif
+ ifeq ($(CONFIG_MTK_RPR410),y)
+ obj-y	+=  rpr410/
+diff --git a/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.c b/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.c
+index 160a6e4..7250b4a 100755
+--- a/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.c
++++ b/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.c
+@@ -60,7 +60,7 @@
+ #define CUST_EINT_ALS_SENSITIVE 	CUST_EINTF_TRIGGER_LOW 
+ #define CUST_EINT_ALS_POLARITY 		CUST_EINT_ALS_TYPE
+ #define POWER_NONE_MACRO MT65XX_POWER_NONE
+-
++extern struct alsps_hw* get_cust_alsps_hw(void);
+ /******************************************************************************
+  * configuration
+ *******************************************************************************/
+diff --git a/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.h b/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.h
+index bb1828a..637a9f3 100644
+--- a/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.h
++++ b/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.h
+@@ -171,6 +171,6 @@
+ #define ALS_MIN_DELAY   100
+ #define PS_MIN_DELAY    10
+ 
+-#define STK_ALS_CODE_CHANGE_THD	10
++#define STK_ALS_CODE_CHANGE_THD	5
+ 
+-#endif
+\ No newline at end of file
++#endif
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/Makefile b/drivers/misc/mediatek/mach/mt6735/benefit_m7/Makefile
+index 7b96fb0..f580d25 100755
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/Makefile
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/Makefile
+@@ -37,8 +37,12 @@ ifeq ($(CONFIG_MTK_MC3XXX_AUTO),y)
+ obj-y   +=  accelerometer/mc3xxx_auto/
+ endif
+ 
+-ifeq ($(CONFIG_MTK_STK3X1X_DRIVER),y)
+-obj-y   +=  alsps/stk3x1x_driver/
++ifeq ($(CONFIG_MTK_STK3X1X_NEW),y)
++obj-y   +=  alsps/stk3x1x-new/
++endif
++
++ifeq ($(CONFIG_MTK_MMC3416X),y)
++obj-y   +=  magnetometer/mmc3416x/
+ endif
+ 
+ ifeq ($(CONFIG_MTK_ITG1010_NEW),y)
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/Makefile b/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/Makefile
+new file mode 100644
+index 0000000..b9b1943
+--- /dev/null
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/Makefile
+@@ -0,0 +1,4 @@
++include $(srctree)/drivers/misc/mediatek/Makefile.custom
++
++obj-y	:=  cust_alsps.o
++
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/cust_alsps.c b/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/cust_alsps.c
+new file mode 100644
+index 0000000..0d74942
+--- /dev/null
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/cust_alsps.c
+@@ -0,0 +1,62 @@
++/* Copyright Statement:
++ *
++ * This software/firmware and related documentation ("MediaTek Software") are
++ * protected under relevant copyright laws. The information contained herein
++ * is confidential and proprietary to MediaTek Inc. and/or its licensors.
++ * Without the prior written permission of MediaTek inc. and/or its licensors,
++ * any reproduction, modification, use or disclosure of MediaTek Software,
++ * and information contained herein, in whole or in part, shall be strictly prohibited.
++ */
++/* MediaTek Inc. (C) 2010. All rights reserved.
++ *
++ * BY OPENING THIS FILE, RECEIVER HEREBY UNEQUIVOCALLY ACKNOWLEDGES AND AGREES
++ * THAT THE SOFTWARE/FIRMWARE AND ITS DOCUMENTATIONS ("MEDIATEK SOFTWARE")
++ * RECEIVED FROM MEDIATEK AND/OR ITS REPRESENTATIVES ARE PROVIDED TO RECEIVER ON
++ * AN "AS-IS" BASIS ONLY. MEDIATEK EXPRESSLY DISCLAIMS ANY AND ALL WARRANTIES,
++ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
++ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT.
++ * NEITHER DOES MEDIATEK PROVIDE ANY WARRANTY WHATSOEVER WITH RESPECT TO THE
++ * SOFTWARE OF ANY THIRD PARTY WHICH MAY BE USED BY, INCORPORATED IN, OR
++ * SUPPLIED WITH THE MEDIATEK SOFTWARE, AND RECEIVER AGREES TO LOOK ONLY TO SUCH
++ * THIRD PARTY FOR ANY WARRANTY CLAIM RELATING THERETO. RECEIVER EXPRESSLY ACKNOWLEDGES
++ * THAT IT IS RECEIVER'S SOLE RESPONSIBILITY TO OBTAIN FROM ANY THIRD PARTY ALL PROPER LICENSES
++ * CONTAINED IN MEDIATEK SOFTWARE. MEDIATEK SHALL ALSO NOT BE RESPONSIBLE FOR ANY MEDIATEK
++ * SOFTWARE RELEASES MADE TO RECEIVER'S SPECIFICATION OR TO CONFORM TO A PARTICULAR
++ * STANDARD OR OPEN FORUM. RECEIVER'S SOLE AND EXCLUSIVE REMEDY AND MEDIATEK'S ENTIRE AND
++ * CUMULATIVE LIABILITY WITH RESPECT TO THE MEDIATEK SOFTWARE RELEASED HEREUNDER WILL BE,
++ * AT MEDIATEK'S OPTION, TO REVISE OR REPLACE THE MEDIATEK SOFTWARE AT ISSUE,
++ * OR REFUND ANY SOFTWARE LICENSE FEES OR SERVICE CHARGE PAID BY RECEIVER TO
++ * MEDIATEK FOR SUCH MEDIATEK SOFTWARE AT ISSUE.
++ *
++ * The following software/firmware and/or related documentation ("MediaTek Software")
++ * have been modified by MediaTek Inc. All revisions are subject to any receiver's
++ * applicable license agreements with MediaTek Inc.
++ */
++
++#include <linux/types.h>
++#include "stk_cust_alsps.h"
++#include <mach/mt_pm_ldo.h>
++
++static struct alsps_hw cust_alsps_hw = {
++	/* i2c bus number, for mt657x, default=0. For mt6589, default=3 */
++
++    .i2c_num    = 3,	
++	//.polling_mode =1,
++	.polling_mode_ps =0,
++	.polling_mode_als =1,   
++    .power_id   = MT65XX_POWER_NONE,    /*LDO is not used*/
++    .power_vol  = VOL_DEFAULT,          /*LDO is not used*/
++    .i2c_addr   = {0x90, 0x00, 0x00, 0x00},	/*STK3x1x*/
++    .als_level  = {5,  9, 36, 59, 90, 260, 300, 400, 500, 845, 1136, 1545, 2364, 4655, 6982},	/* als_code */
++    .als_value  = {10, 10, 40, 65, 90, 145, 225, 300, 550, 930, 1250, 1700, 2600, 5120, 7680, 10240},    /* lux */
++   	.state_val = 0x0,		/* disable all */
++	.psctrl_val = 0x31,		/* ps_persistance=1, ps_gain=64X, PS_IT=0.391ms */
++	.alsctrl_val = 0x2A,	/* als_persistance=1, als_gain=16X, ALS_IT=200ms */
++	.ledctrl_val = 0xFF,	/* 100mA IRDR, 64/64 LED duty */
++	.wait_val = 0x7,		/* 50 ms */
++    .ps_threshold_high = 1700,
++    .ps_threshold_low = 1500,
++};
++struct alsps_hw *get_cust_alsps_hw(void) {
++    return &cust_alsps_hw;
++}
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/codegen.dws b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/codegen.dws
+index 74e92581cb787858f8ca0e2fc70350a33e03e115..d9418c573f762e554f5d2721b5c60066f4c07b16 100755
+GIT binary patch
+delta 164
+zcmezIg7Lu%#tpkACrhwcOb)Q)VEGROlmAO<GIC7bXl*>%K!|6ufi=tIgKQE+h^R~s
+z5a5_3!ZX=HievLM>FJ?NhRKul3zsk%8%(}hn8#&e!N9`6z~JZRJo#Rs<m9xXFg`vY
+k-`UaEHOMhOIMivfV4)0?p~dEhMd6H-7ZeLmwkUA`0C#OQrvLx|
+
+delta 195
+zcmaFxg7L=-#tpkACp$2*Ol}b6m@J^cF^L7plxCT@fn(wVmdU*=Jd+!YWGC}T$xJ@L
+z3RA>0IYyde@+lFX$q52HlSBk2_cC&_2M2h@2RnODRuoYHnj<oC0?Wh&A_&ta3y5$s
+z1Jz9SwNRbBKwM`szp?;aY#&f8K!9U&fb{B6CIjcme+!l{8MsVdT$smYX28J0z`)?=
+b<~(^#q2y$fqOi$H#rr0IDB3q!p~L|IfeSt{
+
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_adc.dtsi b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_adc.dtsi
+index 571c716..d453c9e 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_adc.dtsi
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_adc.dtsi
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_adc.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_adc.h
+index 5d33dab..ed80b12 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_adc.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_adc.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_clk_buf.dtsi b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_clk_buf.dtsi
+index 1683880..c3bc091 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_clk_buf.dtsi
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_clk_buf.dtsi
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_clk_buf.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_clk_buf.h
+index aeb8a1f..1b48100 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_clk_buf.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_clk_buf.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint.dtsi b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint.dtsi
+index a0e73ff..78e9721 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint.dtsi
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint.dtsi
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint.h
+index 1697a18..913213e 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint_md1.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint_md1.h
+index 47a3d5b..86890f3 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint_md1.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_eint_md1.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio.dtsi b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio.dtsi
+index c144a7e..bca0e24 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio.dtsi
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio.dtsi
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+@@ -730,8 +730,8 @@
+ 
+ 	gpio65: gpio@65 {
+ 		pins_cmd_dat {
+-			pins = <PINMUX_GPIO65__FUNC_SPI_CSA>;
+-			slew-rate = <1>;
++			pins = <PINMUX_GPIO65__FUNC_GPIO65>;
++			slew-rate = <0>;
+ 			
+ 			bias-pull-down = <00>;
+ 			output-low;
+@@ -741,8 +741,8 @@
+ 
+ 	gpio66: gpio@66 {
+ 		pins_cmd_dat {
+-			pins = <PINMUX_GPIO66__FUNC_SPI_CKA>;
+-			slew-rate = <1>;
++			pins = <PINMUX_GPIO66__FUNC_GPIO66>;
++			slew-rate = <0>;
+ 			
+ 			bias-pull-down = <00>;
+ 			output-low;
+@@ -752,10 +752,10 @@
+ 
+ 	gpio67: gpio@67 {
+ 		pins_cmd_dat {
+-			pins = <PINMUX_GPIO67__FUNC_SPI_MIA>;
++			pins = <PINMUX_GPIO67__FUNC_GPIO67>;
+ 			slew-rate = <0>;
+ 			
+-			bias-pull-down = <11>;
++			bias-pull-down = <00>;
+ 			output-low;
+ 			input-schmitt-enable = <0>;
+ 		};
+@@ -763,10 +763,10 @@
+ 
+ 	gpio68: gpio@68 {
+ 		pins_cmd_dat {
+-			pins = <PINMUX_GPIO68__FUNC_SPI_MOA>;
+-			slew-rate = <1>;
++			pins = <PINMUX_GPIO68__FUNC_GPIO68>;
++			slew-rate = <0>;
+ 			
+-			bias-pull-down = <11>;
++			bias-pull-down = <00>;
+ 			output-low;
+ 			input-schmitt-enable = <0>;
+ 		};
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio_boot.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio_boot.h
+index 0ab9462..46b5d5a 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio_boot.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio_boot.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+@@ -572,34 +572,34 @@
+ #define GPIO64_SMT       GPIO_SMT_DISABLE
+ 
+ //Configureation for Pin 65
+-#define GPIO65_MODE      GPIO_MODE_01
+-#define GPIO65_DIR       GPIO_DIR_OUT
++#define GPIO65_MODE      GPIO_MODE_00
++#define GPIO65_DIR       GPIO_DIR_IN
+ #define GPIO65_PULLEN    GPIO_PULL_ENABLE
+ #define GPIO65_PULL      GPIO_PULL_DOWN
+ #define GPIO65_DATAOUT   GPIO_OUT_ZERO
+ #define GPIO65_SMT       GPIO_SMT_DISABLE
+ 
+ //Configureation for Pin 66
+-#define GPIO66_MODE      GPIO_MODE_01
+-#define GPIO66_DIR       GPIO_DIR_OUT
++#define GPIO66_MODE      GPIO_MODE_00
++#define GPIO66_DIR       GPIO_DIR_IN
+ #define GPIO66_PULLEN    GPIO_PULL_ENABLE
+ #define GPIO66_PULL      GPIO_PULL_DOWN
+ #define GPIO66_DATAOUT   GPIO_OUT_ZERO
+ #define GPIO66_SMT       GPIO_SMT_DISABLE
+ 
+ //Configureation for Pin 67
+-#define GPIO67_MODE      GPIO_MODE_01
++#define GPIO67_MODE      GPIO_MODE_00
+ #define GPIO67_DIR       GPIO_DIR_IN
+ #define GPIO67_PULLEN    GPIO_PULL_ENABLE
+-#define GPIO67_PULL      GPIO_PULL_UP
++#define GPIO67_PULL      GPIO_PULL_DOWN
+ #define GPIO67_DATAOUT   GPIO_OUT_ZERO
+ #define GPIO67_SMT       GPIO_SMT_DISABLE
+ 
+ //Configureation for Pin 68
+-#define GPIO68_MODE      GPIO_MODE_01
+-#define GPIO68_DIR       GPIO_DIR_OUT
++#define GPIO68_MODE      GPIO_MODE_00
++#define GPIO68_DIR       GPIO_DIR_IN
+ #define GPIO68_PULLEN    GPIO_PULL_ENABLE
+-#define GPIO68_PULL      GPIO_PULL_UP
++#define GPIO68_PULL      GPIO_PULL_DOWN
+ #define GPIO68_DATAOUT   GPIO_OUT_ZERO
+ #define GPIO68_SMT       GPIO_SMT_DISABLE
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio_usage.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio_usage.h
+index 0b9175d..2bc37a0 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio_usage.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_gpio_usage.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+@@ -321,35 +321,9 @@
+ #define GPIO_OTG_DRVVBUS_PIN_M_KCOL   GPIO_MODE_06
+ 
+ #define GPIO_ALS_EINT_PIN         (GPIO65 | 0x80000000)
++#define GPIO_ALS_EINT_PIN_M_EINT   GPIO_MODE_00
+ #define GPIO_ALS_EINT_PIN_M_GPIO   GPIO_MODE_00
+ #define GPIO_ALS_EINT_PIN_M_KROW   GPIO_MODE_04
+-#define GPIO_ALS_EINT_PIN_M_SPI_CSA   GPIO_MODE_01
+-#define GPIO_ALS_EINT_PIN_M_EINT   GPIO_ALS_EINT_PIN_M_GPIO
+-
+-
+-#define GPIO_SPI_CS_PIN         (GPIO87 | 0x80000000)
+-#define GPIO_SPI_CS_PIN_M_GPIO   GPIO_MODE_00
+-#define GPIO_SPI_CS_PIN_M_KCOL   GPIO_MODE_04
+-#define GPIO_SPI_CS_PIN_M_SPI_CKA   GPIO_MODE_01
+-
+-#define GPIO_SPI_SCK_PIN         (GPIO66 | 0x80000000)
+-#define GPIO_SPI_SCK_PIN_M_GPIO   GPIO_MODE_00
+-#define GPIO_SPI_SCK_PIN_M_KCOL   GPIO_MODE_04
+-#define GPIO_SPI_SCK_PIN_M_SPI_CKA   GPIO_MODE_01
+-
+-#define GPIO_SPI_MISO_PIN         (GPIO67 | 0x80000000)
+-#define GPIO_SPI_MISO_PIN_M_GPIO   GPIO_MODE_00
+-#define GPIO_SPI_MISO_PIN_M_SPI_MIA   GPIO_MODE_01
+-
+-#define GPIO_SPI_MOSI_PIN         (GPIO68 | 0x80000000)
+-#define GPIO_SPI_MOSI_PIN_M_GPIO   GPIO_MODE_00
+-#define GPIO_SPI_MOSI_PIN_M_SPI_MOA   GPIO_MODE_01
+-#define GPIO_SPI_MOSI_PIN_M_SPI_MIA   GPIO_MODE_02
+-#define GPIO_SPI_MOSI_PIN_M_I2S3_LRCK   GPIO_MODE_03
+-#define GPIO_SPI_MOSI_PIN_M_PTA_TXD   GPIO_MODE_04
+-#define GPIO_SPI_MOSI_PIN_M_ANT_SEL   GPIO_MODE_05
+-#define GPIO_SPI_MOSI_PIN_M_URTS   GPIO_MODE_06
+-#define GPIO_SPI_MOSI_PIN_M_DBG_MON_A   GPIO_MODE_07
+ 
+ #define GPIO_LCM_PWR         (GPIO69 | 0x80000000)
+ #define GPIO_LCM_PWR_M_GPIO   GPIO_MODE_00
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_i2c.dtsi b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_i2c.dtsi
+index 030ffe5..4a0781c 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_i2c.dtsi
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_i2c.dtsi
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+@@ -14,9 +14,9 @@
+ 		reg = <0x10>;
+ 	};
+ 
+-	CAMERA_MAIN_AF@0C {
++	CAMERA_MAIN_AF@1c {
+ 		compatible = "mediatek,CAMERA_MAIN_AF";
+-		reg = <0x0C>;
++		reg = <0x1c>;
+ 	};
+ 
+ 	CAMERA_SUB@3C {
+@@ -24,6 +24,11 @@
+ 		reg = <0x3C>;
+ 	};
+ 
++	CAMERA_SUB_AF@18 {
++		compatible = "mediatek,CAMERA_SUB_AF";
++		reg = <0x18>;
++	};
++
+ };
+ 
+ &i2c1 {
+@@ -40,9 +45,9 @@
+ };
+ 
+ &i2c2 {
+-	MSENSOR@0D {
++	MSENSOR@30 {
+ 		compatible = "mediatek,MSENSOR";
+-		reg = <0x0D>;
++		reg = <0x30>;
+ 	};
+ 
+ 	GYRO@68 {
+@@ -55,9 +60,9 @@
+ 		reg = <0x4C>;
+ 	};
+ 
+-	ALSPS@60 {
++	ALSPS@48 {
+ 		compatible = "mediatek,ALSPS";
+-		reg = <0x60>;
++		reg = <0x48>;
+ 	};
+ 
+ 	NFC@28 {
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_i2c.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_i2c.h
+index 57d69f6..31755ca 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_i2c.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_i2c.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+@@ -21,7 +21,7 @@
+ 
+ #define I2C_CAMERA_MAIN_AF_AUTO_DETECT			FALSE
+ #define I2C_CAMERA_MAIN_AF_CHANNEL				I2C_CHANNEL_0
+-#define I2C_CAMERA_MAIN_AF_SLAVE_7_BIT_ADDR		0x0C
++#define I2C_CAMERA_MAIN_AF_SLAVE_7_BIT_ADDR		0x1c
+ 
+ 
+ #define I2C_CAMERA_SUB_AUTO_DETECT			FALSE
+@@ -41,7 +41,7 @@
+ 
+ #define I2C_MSENSOR_AUTO_DETECT			FALSE
+ #define I2C_MSENSOR_CHANNEL				I2C_CHANNEL_2
+-#define I2C_MSENSOR_SLAVE_7_BIT_ADDR		0x0D
++#define I2C_MSENSOR_SLAVE_7_BIT_ADDR		0x30
+ 
+ 
+ #define I2C_GYRO_AUTO_DETECT			FALSE
+@@ -56,7 +56,7 @@
+ 
+ #define I2C_ALSPS_AUTO_DETECT			FALSE
+ #define I2C_ALSPS_CHANNEL				I2C_CHANNEL_2
+-#define I2C_ALSPS_SLAVE_7_BIT_ADDR		0x60
++#define I2C_ALSPS_SLAVE_7_BIT_ADDR		0x48
+ 
+ 
+ #define I2C_NFC_AUTO_DETECT			FALSE
+@@ -74,6 +74,11 @@
+ #define I2C_EXT_BUCK_SLAVE_7_BIT_ADDR		0x6B
+ 
+ 
++#define I2C_CAMERA_SUB_AF_AUTO_DETECT			FALSE
++#define I2C_CAMERA_SUB_AF_CHANNEL				I2C_CHANNEL_0
++#define I2C_CAMERA_SUB_AF_SLAVE_7_BIT_ADDR		0x18
++
++
+ #endif /* _CUST_I2C_H */
+ 
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_kpd.dtsi b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_kpd.dtsi
+index 143e88c..79a6974 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_kpd.dtsi
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_kpd.dtsi
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_kpd.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_kpd.h
+index 610ae9b..15edb4b 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_kpd.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_kpd.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_md1_eint.dtsi b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_md1_eint.dtsi
+index 28ef6f5..9a24306 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_md1_eint.dtsi
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_md1_eint.dtsi
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_pmic.dtsi b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_pmic.dtsi
+index 6e019df..d0330f1 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_pmic.dtsi
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_pmic.dtsi
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_power.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_power.h
+index a88ab74..8b6f553 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_power.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/cust_power.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/mt6735m-pinfunc.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/mt6735m-pinfunc.h
+index 4f71124..6808404 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/mt6735m-pinfunc.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/mt6735m-pinfunc.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pinctrl-mtk-mt6735.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pinctrl-mtk-mt6735.h
+index 361eaf8..971825f 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pinctrl-mtk-mt6735.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pinctrl-mtk-mt6735.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pmic_drv.c b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pmic_drv.c
+index 0d1bc2d..25c6f8b 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pmic_drv.c
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pmic_drv.c
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pmic_drv.h b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pmic_drv.h
+index 01592ac..0eeee83 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pmic_drv.h
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/dct/dct/pmic_drv.h
+@@ -1,6 +1,6 @@
+ /*
+  * Generated by MTK SP DrvGen Version 03.13.6 for MT6735M. Copyright MediaTek Inc. (C) 2013.
+- * Tue May 03 15:52:22 2016
++ * Tue May 03 19:17:49 2016
+  * Do Not Modify the File.
+  */
+ 
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/magnetometer/mmc3416x/Makefile b/drivers/misc/mediatek/mach/mt6735/benefit_m7/magnetometer/mmc3416x/Makefile
+new file mode 100755
+index 0000000..b27cc86
+--- /dev/null
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/magnetometer/mmc3416x/Makefile
+@@ -0,0 +1,4 @@
++include $(srctree)/drivers/misc/mediatek/Makefile.custom
++
++obj-y	:=  cust_mag.o
++
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/magnetometer/mmc3416x/cust_mag.c b/drivers/misc/mediatek/mach/mt6735/benefit_m7/magnetometer/mmc3416x/cust_mag.c
+new file mode 100644
+index 0000000..c491a44
+--- /dev/null
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/magnetometer/mmc3416x/cust_mag.c
+@@ -0,0 +1,16 @@
++
++#include <linux/types.h>
++#include <mach/mt_pm_ldo.h>
++#include <cust_mag.h>
++
++
++static struct mag_hw cust_mag_hw = {
++    .i2c_num = 3,
++    .direction = 7,
++    .power_id = MT65XX_POWER_NONE,  /*!< LDO is not used */
++    .power_vol= VOL_DEFAULT,        /*!< LDO is not used */
++};
++struct mag_hw* get_cust_mag_hw(void) 
++{
++    return &cust_mag_hw;
++}
+diff --git a/drivers/misc/mediatek/magnetometer/mmc3416x/mmc3416x.c b/drivers/misc/mediatek/magnetometer/mmc3416x/mmc3416x.c
+old mode 100755
+new mode 100644
+index 3ea14dd..fcee0d5
+--- a/drivers/misc/mediatek/magnetometer/mmc3416x/mmc3416x.c
++++ b/drivers/misc/mediatek/magnetometer/mmc3416x/mmc3416x.c
+@@ -158,7 +158,6 @@ static struct i2c_driver mmc3416x_i2c_driver = {
+ };
+ 
+ /*----------------------------------------------------------------------------*/
+-#if 0
+ static struct platform_driver mmc_sensor_driver = {
+ 	.probe      = mmc_probe,
+ 	.remove     = mmc_remove,    
+@@ -167,27 +166,7 @@ static struct platform_driver mmc_sensor_driver = {
+ 		//.owner = THIS_MODULE,
+ 	}
+ };
+-#endif
+ 
+-#ifdef CONFIG_OF
+-static const struct of_device_id mmc_of_match[] = {
+-	{ .compatible = "mediatek,msensor", },
+-	{},
+-};
+-#endif
+-
+-static struct platform_driver mmc_sensor_driver =
+-{
+-	.probe      = mmc_probe,
+-	.remove     = mmc_remove,    
+-	.driver     = 
+-	{
+-		.name = "msensor",
+-        #ifdef CONFIG_OF
+-		.of_match_table = mmc_of_match,
+-		#endif
+-	}
+-};
+ 
+ /*----------------------------------------------------------------------------*/
+ static atomic_t dev_open_count;
+@@ -197,7 +176,7 @@ static int mmc3416x_SetPowerMode(struct i2c_client *client, bool enable)
+ 	u8 databuf[2];    
+ 	int res = 0;
+ 	u8 addr = MMC3416X_REG_CTRL;
+-	//struct mmc3416x_i2c_data *obj = i2c_get_clientdata(client);
++	struct mmc3416x_i2c_data *obj = i2c_get_clientdata(client);
+ 
+ 	if(hwmsen_read_byte(client, addr, databuf))
+ 	{
+@@ -287,7 +266,7 @@ static int I2C_RxData(char *rxData, int length)
+ 
+ 	for(loop_i = 0; loop_i < MMC3416X_RETRY_COUNT; loop_i++)
+ 	{
+-		this_client->addr = (this_client->addr & I2C_MASK_FLAG) | (I2C_WR_FLAG);
++		this_client->addr = this_client->addr & I2C_MASK_FLAG | I2C_WR_FLAG;
+ 		if(i2c_master_send(this_client, (const char*)rxData, ((length<<0X08) | 0X01)))
+ 		{
+ 			break;
+@@ -390,11 +369,11 @@ static int ECS_SaveData(int buf[12])
+ static int ECS_ReadXYZData(int *vec, int size)
+ {
+ 	unsigned char data[6] = {0,0,0,0,0,0};
+-	//ktime_t expires;
+-	//int wait_n=0;
+-	//int MD_times = 0;
++	ktime_t expires;
++	int wait_n=0;
++	int MD_times = 0;
+ 	static int last_data[3];
+-	struct timespec time1, time2, time3;//,time4,delay,aa;
++	struct timespec time1, time2, time3,time4,delay,aa;
+ #if DEBUG	
+ 	struct i2c_client *client = this_client;  
+ 	struct mmc3416x_i2c_data *clientdata = i2c_get_clientdata(client);
+@@ -642,7 +621,7 @@ static ssize_t show_layout_value(struct device_driver *ddri, char *buf)
+ 		data->cvt.sign[2],data->cvt.map[0], data->cvt.map[1], data->cvt.map[2]);            
+ }
+ /*----------------------------------------------------------------------------*/
+-static ssize_t store_layout_value(struct device_driver *ddri, const char *buf, size_t count)
++static ssize_t store_layout_value(struct device_driver *ddri, char *buf, size_t count)
+ {
+ 	struct i2c_client *client = this_client;  
+ 	struct mmc3416x_i2c_data *data = i2c_get_clientdata(client);
+@@ -707,7 +686,7 @@ static ssize_t show_trace_value(struct device_driver *ddri, char *buf)
+ 	return res;    
+ }
+ /*----------------------------------------------------------------------------*/
+-static ssize_t store_trace_value(struct device_driver *ddri, const char *buf, size_t count)
++static ssize_t store_trace_value(struct device_driver *ddri, char *buf, size_t count)
+ {
+ 	struct mmc3416x_i2c_data *obj = i2c_get_clientdata(this_client);
+ 	int trace;
+@@ -723,7 +702,7 @@ static ssize_t store_trace_value(struct device_driver *ddri, const char *buf, si
+ 	}
+ 	else 
+ 	{
+-		printk(KERN_ERR "invalid content: '%s', length = %d\n", buf, count);
++		//printk(KERN_ERR "invalid content: '%s', length = %d\n", buf, count);
+ 	}
+ 	
+ 	return count;    
+@@ -765,7 +744,7 @@ static int mmc3416x_create_attr(struct device_driver *driver)
+ 
+ 	for(idx = 0; idx < num; idx++)
+ 	{
+-		if((err = driver_create_file(driver, mmc3416x_attr_list[idx])))
++		if(err = driver_create_file(driver, mmc3416x_attr_list[idx]))
+ 		{            
+ 			printk(KERN_ERR "driver_create_file (%s) = %d\n", mmc3416x_attr_list[idx]->attr.name, err);
+ 			break;
+@@ -823,7 +802,7 @@ static int mmc3416x_release(struct inode *inode, struct file *file)
+ }
+ /*----------------------------------------------------------------------------*/
+ //static int mmc3416x_ioctl(struct inode *inode, struct file *file, unsigned int cmd,unsigned long arg)
+-	static long mmc3416x_unlocked_ioctl( struct file *file, unsigned int cmd,unsigned long arg)
++	static int mmc3416x_unlocked_ioctl( struct file *file, unsigned int cmd,unsigned long arg)
+ 
+ {
+ 	void __user *argp = (void __user *)arg;
+@@ -1489,14 +1468,14 @@ static int mmc3416x_i2c_probe(struct i2c_client *client, const struct i2c_device
+ 
+ 
+ 	/* Register sysfs attribute */
+-	if((err = mmc3416x_create_attr(&mmc_sensor_driver.driver)))
++	if(err = mmc3416x_create_attr(&mmc_sensor_driver.driver))
+ 	{
+ 		printk(KERN_ERR "create attribute err = %d\n", err);
+ 		goto exit_sysfs_create_group_failed;
+ 	}
+ 
+ 	
+-	if((err = misc_register(&mmc3416x_device)))
++	if(err = misc_register(&mmc3416x_device))
+ 	{
+ 		printk(KERN_ERR "mmc3416x_device register failed\n");
+ 		goto exit_misc_device_register_failed;	}    
+@@ -1504,7 +1483,7 @@ static int mmc3416x_i2c_probe(struct i2c_client *client, const struct i2c_device
+ 	sobj_m.self = data;
+     sobj_m.polling = 1;
+     sobj_m.sensor_operate = mmc3416x_operate;
+-	if((err = hwmsen_attach(ID_MAGNETIC, &sobj_m)))
++	if(err = hwmsen_attach(ID_MAGNETIC, &sobj_m))
+ 	{
+ 		printk(KERN_ERR "attach fail = %d\n", err);
+ 		goto exit_kfree;
+@@ -1513,7 +1492,7 @@ static int mmc3416x_i2c_probe(struct i2c_client *client, const struct i2c_device
+ 	sobj_o.self = data;
+     sobj_o.polling = 1;
+     sobj_o.sensor_operate = mmc3416x_orientation_operate;
+-	if((err = hwmsen_attach(ID_ORIENTATION, &sobj_o)))
++	if(err = hwmsen_attach(ID_ORIENTATION, &sobj_o))
+ 	{
+ 		printk(KERN_ERR "attach fail = %d\n", err);
+ 		goto exit_kfree;
+@@ -1542,7 +1521,7 @@ static int mmc3416x_i2c_remove(struct i2c_client *client)
+ {
+ 	int err;	
+ 	
+-	if((err = mmc3416x_delete_attr(&mmc_sensor_driver.driver)))
++	if(err = mmc3416x_delete_attr(&mmc_sensor_driver.driver))
+ 	{
+ 		printk(KERN_ERR "mmc3416x_delete_attr fail: %d\n", err);
+ 	}
+@@ -1608,3 +1587,4 @@ MODULE_LICENSE("GPL");
+ MODULE_VERSION(DRIVER_VERSION);
+ 
+ 
++
+diff --git a/drivers/misc/mediatek/magnetometer/mmc3416x/mmc3416x.h b/drivers/misc/mediatek/magnetometer/mmc3416x/mmc3416x.h
+old mode 100755
+new mode 100644
+-- 
+2.7.4
+

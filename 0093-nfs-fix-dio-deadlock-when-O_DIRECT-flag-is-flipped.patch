@@ -1,0 +1,43 @@
+From 7e7455df13664d09e6fbf33cb3df0478756b9d54 Mon Sep 17 00:00:00 2001
+From: Peng Tao <tao.peng@primarydata.com>
+Date: Tue, 20 Jan 2015 07:44:29 +0800
+Subject: [PATCH 0093/1168] nfs: fix dio deadlock when O_DIRECT flag is flipped
+
+commit ee8a1a8b160a87dc3a9c81a86796aa4db85ea815 upstream.
+
+We only support swap file calling nfs_direct_IO. However, application
+might be able to get to nfs_direct_IO if it toggles O_DIRECT flag
+during IO and it can deadlock because we grab inode->i_mutex in
+nfs_file_direct_write(). So return 0 for such case. Then the generic
+layer will fall back to buffer IO.
+
+Signed-off-by: Peng Tao <tao.peng@primarydata.com>
+Signed-off-by: Trond Myklebust <trond.myklebust@primarydata.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 9ee64e61379b5ad6c3129ba0fdaf6b0a6cc4d077
+---
+ fs/nfs/direct.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/fs/nfs/direct.c b/fs/nfs/direct.c
+index 725e875..615c507 100644
+--- a/fs/nfs/direct.c
++++ b/fs/nfs/direct.c
+@@ -123,6 +123,12 @@ static inline int put_dreq(struct nfs_direct_req *dreq)
+  */
+ ssize_t nfs_direct_IO(int rw, struct kiocb *iocb, const struct iovec *iov, loff_t pos, unsigned long nr_segs)
+ {
++	struct inode *inode = iocb->ki_filp->f_mapping->host;
++
++	/* we only support swap file calling nfs_direct_IO */
++	if (!IS_SWAPFILE(inode))
++		return 0;
++
+ #ifndef CONFIG_NFS_SWAP
+ 	dprintk("NFS: nfs_direct_IO (%s) off/no(%Ld/%lu) EINVAL\n",
+ 			iocb->ki_filp->f_path.dentry->d_name.name,
+-- 
+2.7.4
+

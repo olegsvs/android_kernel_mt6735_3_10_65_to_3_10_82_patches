@@ -1,0 +1,72 @@
+From 1a81b9c9319258a975115f7a1fa23cdb1a990aba Mon Sep 17 00:00:00 2001
+From: Stratos Karafotis <stratosk@semaphore.gr>
+Date: Mon, 30 Jun 2014 19:59:33 +0300
+Subject: [PATCH 0896/1168] cpufreq: Introduce new relation for freq selection
+
+Introduce CPUFREQ_RELATION_C for frequency selection.
+It selects the frequency with the minimum euclidean distance to target.
+In case of equal distance between 2 frequencies, it will select the
+greater frequency.
+
+Signed-off-by: Stratos Karafotis <stratosk@semaphore.gr>
+Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: de8fe3bb6db7c1b0926de3936cf34ebc67d7459f
+---
+ drivers/cpufreq/freq_table.c | 12 +++++++++++-
+ include/linux/cpufreq.h      |  1 +
+ 2 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/cpufreq/freq_table.c b/drivers/cpufreq/freq_table.c
+index d7a7966..1bee19b 100755
+--- a/drivers/cpufreq/freq_table.c
++++ b/drivers/cpufreq/freq_table.c
+@@ -104,7 +104,7 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
+ 		.index = ~0,
+ 		.frequency = 0,
+ 	};
+-	unsigned int i;
++	unsigned int diff, i;
+ 
+ 	pr_debug("request for target %u kHz (relation: %u) for cpu %u\n",
+ 					target_freq, relation, policy->cpu);
+@@ -114,6 +114,7 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
+ 		suboptimal.frequency = ~0;
+ 		break;
+ 	case CPUFREQ_RELATION_L:
++	case CPUFREQ_RELATION_C:
+ 		optimal.frequency = ~0;
+ 		break;
+ 	}
+@@ -151,6 +152,15 @@ int cpufreq_frequency_table_target(struct cpufreq_policy *policy,
+ 				}
+ 			}
+ 			break;
++		case CPUFREQ_RELATION_C:
++			diff = abs(freq - target_freq);
++			if (diff < optimal.frequency ||
++			    (diff == optimal.frequency &&
++			     freq > table[optimal.index].frequency)) {
++				optimal.frequency = diff;
++				optimal.index = i;
++			}
++			break;
+ 		}
+ 	}
+ 	if (optimal.index > i) {
+diff --git a/include/linux/cpufreq.h b/include/linux/cpufreq.h
+index 636bfb3..7f4c532 100644
+--- a/include/linux/cpufreq.h
++++ b/include/linux/cpufreq.h
+@@ -226,6 +226,7 @@ void cpufreq_unregister_governor(struct cpufreq_governor *governor);
+ 
+ #define CPUFREQ_RELATION_L 0  /* lowest frequency at or above target */
+ #define CPUFREQ_RELATION_H 1  /* highest frequency below or at target */
++#define CPUFREQ_RELATION_C 2  /* closest frequency to target */
+ 
+ struct freq_attr;
+ 
+-- 
+2.7.4
+

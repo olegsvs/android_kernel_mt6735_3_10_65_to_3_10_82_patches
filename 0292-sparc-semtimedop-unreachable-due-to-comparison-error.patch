@@ -1,0 +1,45 @@
+From 01681e46fab79b03b8c035325839d31c9bc033bb Mon Sep 17 00:00:00 2001
+From: Rob Gardner <rob.gardner@oracle.com>
+Date: Mon, 2 Mar 2015 23:16:55 -0700
+Subject: [PATCH 0292/1168] sparc: semtimedop() unreachable due to comparison
+ error
+
+[ Upstream commit 53eb2516972b8c4628651dfcb926cb9ef8b2864a ]
+
+A bug was reported that the semtimedop() system call was always
+failing eith ENOSYS.
+
+Since SEMCTL is defined as 3, and SEMTIMEDOP is defined as 4,
+the comparison "call <= SEMCTL" will always prevent SEMTIMEDOP
+from getting through to the semaphore ops switch statement.
+
+This is corrected by changing the comparison to "call <= SEMTIMEDOP".
+
+Orabug: 20633375
+
+Signed-off-by: Rob Gardner <rob.gardner@oracle.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 0ebfe48078682a79dd1b7b2c50f9fe68c793928d
+---
+ arch/sparc/kernel/sys_sparc_64.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/sparc/kernel/sys_sparc_64.c b/arch/sparc/kernel/sys_sparc_64.c
+index 2daaaa6..be8db9b 100644
+--- a/arch/sparc/kernel/sys_sparc_64.c
++++ b/arch/sparc/kernel/sys_sparc_64.c
+@@ -336,7 +336,7 @@ SYSCALL_DEFINE6(sparc_ipc, unsigned int, call, int, first, unsigned long, second
+ 	long err;
+ 
+ 	/* No need for backward compatibility. We can start fresh... */
+-	if (call <= SEMCTL) {
++	if (call <= SEMTIMEDOP) {
+ 		switch (call) {
+ 		case SEMOP:
+ 			err = sys_semtimedop(first, ptr,
+-- 
+2.7.4
+

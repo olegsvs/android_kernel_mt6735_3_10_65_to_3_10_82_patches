@@ -1,0 +1,38 @@
+From 14820d954cf3effd003dd9beea0f1e9871db9b02 Mon Sep 17 00:00:00 2001
+From: Axel Lin <axel.lin@ingics.com>
+Date: Fri, 15 May 2015 09:15:16 +0800
+Subject: [PATCH 0672/1168] ASoC: wm8955: Fix setting wrong register for
+ WM8955_K_8_0_MASK bits
+
+commit 12c350050538c7dc779c083b7342bfd20f74949c upstream.
+
+WM8955_K_8_0_MASK bits is controlled by WM8955_PLL_CONTROL_3 rather than
+WM8955_PLL_CONTROL_2.
+
+Signed-off-by: Axel Lin <axel.lin@ingics.com>
+Acked-by: Charles Keepax <ckeepax@opensource.wolfsonmicro.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 567560e67d4a863662efa846566337310d1df44c
+---
+ sound/soc/codecs/wm8955.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sound/soc/codecs/wm8955.c b/sound/soc/codecs/wm8955.c
+index 1c1fc61..475fc24 100644
+--- a/sound/soc/codecs/wm8955.c
++++ b/sound/soc/codecs/wm8955.c
+@@ -298,7 +298,7 @@ static int wm8955_configure_clocking(struct snd_soc_codec *codec)
+ 		snd_soc_update_bits(codec, WM8955_PLL_CONTROL_2,
+ 				    WM8955_K_17_9_MASK,
+ 				    (pll.k >> 9) & WM8955_K_17_9_MASK);
+-		snd_soc_update_bits(codec, WM8955_PLL_CONTROL_2,
++		snd_soc_update_bits(codec, WM8955_PLL_CONTROL_3,
+ 				    WM8955_K_8_0_MASK,
+ 				    pll.k & WM8955_K_8_0_MASK);
+ 		if (pll.k)
+-- 
+2.7.4
+

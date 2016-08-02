@@ -1,0 +1,117 @@
+From ea981a413f7f0c573e749fb9fb1b9485cf73293f Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Sun, 8 May 2016 22:55:31 +0300
+Subject: [PATCH 1067/1168] Readded D2TW
+
+---
+ arch/arm64/configs/benefit_m7_defconfig    |  9 +++++----
+ drivers/input/touchscreen/doubletap2wake.c | 14 +++++++++++++-
+ drivers/input/touchscreen/sweep2wake.c     | 12 +++++++++++-
+ 3 files changed, 29 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm64/configs/benefit_m7_defconfig b/arch/arm64/configs/benefit_m7_defconfig
+index 9d85653..ecf4cb1 100644
+--- a/arch/arm64/configs/benefit_m7_defconfig
++++ b/arch/arm64/configs/benefit_m7_defconfig
+@@ -170,7 +170,7 @@ CONFIG_HAVE_DMA_ATTRS=y
+ CONFIG_USE_GENERIC_SMP_HELPERS=y
+ CONFIG_GENERIC_SMP_IDLE_THREAD=y
+ CONFIG_HAVE_CLK=y
+-CONFIG_HAVE_DMA_API_DEBUG=n
++CONFIG_HAVE_DMA_API_DEBUG=y
+ CONFIG_HAVE_HW_BREAKPOINT=y
+ CONFIG_HAVE_ARCH_JUMP_LABEL=y
+ CONFIG_ARCH_WANT_COMPAT_IPC_PARSE_VERSION=y
+@@ -994,6 +994,7 @@ CONFIG_THUNDERQUAKE_ENGINE_GPL=y
+ # CONFIG_SENSORS_LIS3_I2C is not set
+ 
+ # pocket mode (avoid dt2w to be active while proximity sensor is triggered)
++CONFIG_POCKETMOD=y
+ CONFIG_DYNAMIC_FSYNC=y
+ #
+ # Altera FPGA firmware download module
+@@ -1639,9 +1640,9 @@ CONFIG_TOUCHSCREEN_MTK=y
+ # CONFIG_TOUCHSCREEN_GT1151 is not set
+ CONFIG_MTK_GT915_HD=y
+ # doubletap 2 wake!
+-CONFIG_TOUCHSCREEN_SWEEP2WAKE=n
+-CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE=n
+-CONFIG_TOUCHSCREEN_PREVENT_SLEEP=n
++CONFIG_TOUCHSCREEN_SWEEP2WAKE=y
++CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE=y
++CONFIG_TOUCHSCREEN_PREVENT_SLEEP=y
+ CONFIG_TOUCHSCREEN_MTK_FT6206_X2605=y
+ 
+ # CONFIG_MTK_GT915_QHD is not set
+diff --git a/drivers/input/touchscreen/doubletap2wake.c b/drivers/input/touchscreen/doubletap2wake.c
+index e07cc45..5878689 100644
+--- a/drivers/input/touchscreen/doubletap2wake.c
++++ b/drivers/input/touchscreen/doubletap2wake.c
+@@ -4,6 +4,8 @@
+  *
+  * Copyright (c) 2013, Dennis Rassmann <showp1984@gmail.com>
+  * Copyright (c) 2015, Vineeth Raj <contact.twn@openmailbox.org>
++ * Copyright (c) 2015, Swapnil Solanki <swapnil133609@gmail.com>
++ * Copyright (c) 2015, Levin Calado <levincalado@gmail.com>
+  *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License as published by
+@@ -51,6 +53,10 @@
+ #define ANDROID_TOUCH_DECLARED
+ #endif
+ 
++#ifdef CONFIG_POCKETMOD
++#include <linux/pocket_mod.h>
++#endif
++
+ /* Version, author, desc, etc */
+ #define DRIVER_AUTHOR "Dennis Rassmann <showp1984@gmail.com>"
+ #define DRIVER_DESCRIPTION "Doubletap2wake for almost any device"
+@@ -191,7 +197,13 @@ static void detect_doubletap2wake(int x, int y, bool st)
+ }
+ 
+ static void dt2w_input_callback(struct work_struct *unused) {
+-
++	
++	#ifdef CONFIG_POCKETMOD
++	if (device_is_pocketed()){
++		return;
++	}
++	else
++	#endif
+ 	detect_doubletap2wake(touch_x, touch_y, true);
+ 
+ 	return;
+diff --git a/drivers/input/touchscreen/sweep2wake.c b/drivers/input/touchscreen/sweep2wake.c
+index 27062c6..04b6d4d 100644
+--- a/drivers/input/touchscreen/sweep2wake.c
++++ b/drivers/input/touchscreen/sweep2wake.c
+@@ -42,6 +42,10 @@
+ #endif
+ #endif
+ 
++#ifdef CONFIG_POCKETMOD
++#include <linux/pocket_mod.h>
++#endif
++
+ /* uncomment since no touchscreen defines android touch, do that here */
+ //#define ANDROID_TOUCH_DECLARED
+ 
+@@ -243,7 +247,13 @@ static void detect_sweep2wake(int x, int y, bool st)
+ }
+ 
+ static void s2w_input_callback(struct work_struct *unused) {
+-
++	
++	#ifdef CONFIG_POCKETMOD
++	if (device_is_pocketed()){
++		return;
++	}
++	else
++	#endif
+ 	detect_sweep2wake(touch_x, touch_y, true);
+ 
+ 	return;
+-- 
+2.7.4
+

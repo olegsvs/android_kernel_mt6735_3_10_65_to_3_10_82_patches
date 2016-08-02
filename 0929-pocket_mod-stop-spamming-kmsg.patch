@@ -1,0 +1,27 @@
+From 1b2f0d2c847dbd40cc1c5edca02f42c31b85cd72 Mon Sep 17 00:00:00 2001
+From: thewisenerd <contact.twn@openmailbox.org>
+Date: Sun, 15 Nov 2015 08:36:40 +0800
+Subject: [PATCH 0929/1168] pocket_mod: stop spamming kmsg
+
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 552fa5db46ab78e91498860bd3962a7bc7d973d0
+---
+ drivers/misc/pocket_mod.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/misc/pocket_mod.c b/drivers/misc/pocket_mod.c
+index ff31e01..af01499 100644
+--- a/drivers/misc/pocket_mod.c
++++ b/drivers/misc/pocket_mod.c
+@@ -51,7 +51,6 @@ int device_is_pocketed(void) {
+ 	//	}
+ 	//}
+ 
+-	printk(KERN_INFO "%s: screen is on\n", __func__);
+ 	return 0;
+ }
+ 
+-- 
+2.7.4
+

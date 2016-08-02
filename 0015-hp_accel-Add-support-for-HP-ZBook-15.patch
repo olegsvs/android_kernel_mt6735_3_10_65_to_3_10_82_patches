@@ -1,0 +1,36 @@
+From 69f9ca02cf4dd929f2534b426c5a326932d99b55 Mon Sep 17 00:00:00 2001
+From: Dominique Leuenberger <dimstar@opensuse.org>
+Date: Thu, 13 Nov 2014 20:57:37 +0100
+Subject: [PATCH 0015/1168] hp_accel: Add support for HP ZBook 15
+
+commit 6583659e0f92e38079a8dd081e0a1181a0f37747 upstream.
+
+HP ZBook 15 laptop needs a non-standard mapping (x_inverted).
+
+BugLink: http://bugzilla.opensuse.org/show_bug.cgi?id=905329
+Signed-off-by: Dominique Leuenberger <dimstar@opensuse.org>
+Signed-off-by: Takashi Iwai <tiwai@suse.de>
+Signed-off-by: Darren Hart <dvhart@linux.intel.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: e9905ebc974ac183537b2bbb9518a3287e859c3a
+---
+ drivers/platform/x86/hp_accel.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/platform/x86/hp_accel.c b/drivers/platform/x86/hp_accel.c
+index 0ed96df..3458eb6 100755
+--- a/drivers/platform/x86/hp_accel.c
++++ b/drivers/platform/x86/hp_accel.c
+@@ -237,6 +237,7 @@ static struct dmi_system_id lis3lv02d_dmi_ids[] = {
+ 	AXIS_DMI_MATCH("HPB64xx", "HP ProBook 64", xy_swap),
+ 	AXIS_DMI_MATCH("HPB64xx", "HP EliteBook 84", xy_swap),
+ 	AXIS_DMI_MATCH("HPB65xx", "HP ProBook 65", x_inverted),
++	AXIS_DMI_MATCH("HPZBook15", "HP ZBook 15", x_inverted),
+ 	{ NULL, }
+ /* Laptop models without axis info (yet):
+  * "NC6910" "HP Compaq 6910"
+-- 
+2.7.4
+

@@ -1,0 +1,65 @@
+From ed615f390f4002257b8288e235fdfb586eb3bb19 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Fri, 6 May 2016 22:37:00 +0300
+Subject: [PATCH 002/117] fix readme
+
+---
+ README.md | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/README.md b/README.md
+index a7b67b2..0aa154f 100644
+--- a/README.md
++++ b/README.md
+@@ -1,26 +1,48 @@
+ Big Thanks To
+ 
+ @visi0nary 
++
+ @Zormax 
++
+ @abgoyal  
++
+ @blackaxe1225   
++
+ @divis1969  
++
+ @Dinolek 
++
+ @dmurimi14  
++
+ @DQuest  
++
+ @gueste  
++
+ @pscamodio  
++
+ @huyparody  
++
+ @micbanand  
++
+ @mohamedhagag  
++
+ @mukulsoni 
++
+ @neohackt  
++
+ @Netmatrix  
++
+ @rombaby  
++
+ @SdtBarbarossa  
++
+ @tiltkoko  
++
+ @hecatae 
++
+ @UNwS 
++
+ @vipintm 
++
+ @walter79
+ 
+-- 
+2.7.4
+

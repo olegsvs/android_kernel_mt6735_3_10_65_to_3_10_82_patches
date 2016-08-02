@@ -1,0 +1,94 @@
+From d0342c7e080155a214069947a94f7617bfe65f9b Mon Sep 17 00:00:00 2001
+From: David Miller <davem@davemloft.net>
+Date: Tue, 16 Dec 2014 17:58:17 -0500
+Subject: [PATCH 0007/1168] first
+
+Former-commit-id: 9c51390ea1fb92c5610362f9b55851a33b02573c
+---
+ net/netlink/af_netlink.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/net/netlink/af_netlink.c b/net/netlink/af_netlink.c
+index 777d266..688a69e 100644
+--- a/net/netlink/af_netlink.c
++++ b/net/netlink/af_netlink.c
+@@ -565,6 +565,7 @@ static int netlink_mmap_sendmsg(struct sock *sk, struct msghdr *msg,
+ 	struct sk_buff *skb;
+ 	unsigned int maxlen;
+ <<<<<<< HEAD
++<<<<<<< HEAD
+ 	//bool excl = true;
+ 	int err = 0, len = 0;
+ 
+@@ -574,6 +575,10 @@ static int netlink_mmap_sendmsg(struct sock *sk, struct msghdr *msg,
+ 	int err = 0, len = 0;
+ 
+ >>>>>>> 3847ee2... netlink: Always copy on mmap TX.
++=======
++	int err = 0, len = 0;
++
++>>>>>>> 3847ee2... netlink: Always copy on mmap TX.
+ 	mutex_lock(&nlk->pg_vec_lock);
+ 
+ 	ring   = &nlk->tx_ring;
+@@ -581,11 +586,16 @@ static int netlink_mmap_sendmsg(struct sock *sk, struct msghdr *msg,
+ 
+ 	do {
+ <<<<<<< HEAD
++<<<<<<< HEAD
+ unsigned int nm_len;
+ =======
+ 		unsigned int nm_len;
+ 
+ >>>>>>> 3847ee2... netlink: Always copy on mmap TX.
++=======
++		unsigned int nm_len;
++
++>>>>>>> 3847ee2... netlink: Always copy on mmap TX.
+ 		hdr = netlink_current_frame(ring, NL_MMAP_STATUS_VALID);
+ 		if (hdr == NULL) {
+ 			if (!(msg->msg_flags & MSG_DONTWAIT) &&
+@@ -594,12 +604,17 @@ unsigned int nm_len;
+ 			continue;
+ 		}
+ <<<<<<< HEAD
++<<<<<<< HEAD
+ 	//	if (hdr->nm_len > maxlen) {
+ nm_len = ACCESS_ONCE(hdr->nm_len);
+ =======
+ 
+ 		nm_len = ACCESS_ONCE(hdr->nm_len);
+ >>>>>>> 3847ee2... netlink: Always copy on mmap TX.
++=======
++
++		nm_len = ACCESS_ONCE(hdr->nm_len);
++>>>>>>> 3847ee2... netlink: Always copy on mmap TX.
+ 		if (nm_len > maxlen) {
+ 			err = -EINVAL;
+ 			goto out;
+@@ -607,6 +622,7 @@ nm_len = ACCESS_ONCE(hdr->nm_len);
+ 
+ 		netlink_frame_flush_dcache(hdr, nm_len);
+ <<<<<<< HEAD
++<<<<<<< HEAD
+ skb = alloc_skb(nm_len, GFP_KERNEL);
+ 		if (skb == NULL) {
+ 			err = -ENOBUFS;
+@@ -623,6 +639,14 @@ __skb_put(skb, nm_len);
+ 			err = -ENOBUFS;
+ 			goto out;
+ 		}
++=======
++
++		skb = alloc_skb(nm_len, GFP_KERNEL);
++		if (skb == NULL) {
++			err = -ENOBUFS;
++			goto out;
++		}
++>>>>>>> 3847ee2... netlink: Always copy on mmap TX.
+ 		__skb_put(skb, nm_len);
+ 		memcpy(skb->data, (void *)hdr + NL_MMAP_HDRLEN, nm_len);
+ 		netlink_set_status(hdr, NL_MMAP_STATUS_UNUSED);
+-- 
+2.7.4
+

@@ -1,0 +1,38 @@
+From 6a81ca3674b3fddf3640c535888f30f358c52491 Mon Sep 17 00:00:00 2001
+From: Ilya Dryomov <idryomov@redhat.com>
+Date: Wed, 5 Nov 2014 19:33:44 +0300
+Subject: [PATCH 0225/1168] libceph: change from BUG to WARN for __remove_osd()
+ asserts
+
+commit cc9f1f518cec079289d11d732efa490306b1ddad upstream.
+
+No reason to use BUG_ON for osd request list assertions.
+
+Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+Reviewed-by: Alex Elder <elder@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: c4c64d6c9e35c01203c7eead5f7ec5de86b96464
+---
+ net/ceph/osd_client.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/net/ceph/osd_client.c b/net/ceph/osd_client.c
+index d2e44ee..3f34304 100644
+--- a/net/ceph/osd_client.c
++++ b/net/ceph/osd_client.c
+@@ -968,8 +968,8 @@ static void put_osd(struct ceph_osd *osd)
+ static void __remove_osd(struct ceph_osd_client *osdc, struct ceph_osd *osd)
+ {
+ 	dout("__remove_osd %p\n", osd);
+-	BUG_ON(!list_empty(&osd->o_requests));
+-	BUG_ON(!list_empty(&osd->o_linger_requests));
++	WARN_ON(!list_empty(&osd->o_requests));
++	WARN_ON(!list_empty(&osd->o_linger_requests));
+ 
+ 	rb_erase(&osd->o_node, &osdc->osds);
+ 	list_del_init(&osd->o_osd_lru);
+-- 
+2.7.4
+

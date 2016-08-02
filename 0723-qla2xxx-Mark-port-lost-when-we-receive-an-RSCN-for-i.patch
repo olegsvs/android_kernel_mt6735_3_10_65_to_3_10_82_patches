@@ -1,0 +1,59 @@
+From 9305bf5678dc8980c8291749c4ced3328a42ab6a Mon Sep 17 00:00:00 2001
+From: Chad Dupuis <chad.dupuis@qlogic.com>
+Date: Thu, 25 Sep 2014 05:17:01 -0400
+Subject: [PATCH 0723/1168] qla2xxx: Mark port lost when we receive an RSCN for
+ it.
+
+commit ef86cb2059a14b4024c7320999ee58e938873032 upstream.
+
+Signed-off-by: Chad Dupuis <chad.dupuis@qlogic.com>
+Signed-off-by: Saurav Kashyap <saurav.kashyap@qlogic.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Cc: Himanshu Madhani <himanshu.madhani@qlogic.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 7133f44ec9dcd46d5970c5240c0149e505826dcf
+---
+ drivers/scsi/qla2xxx/qla_isr.c | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/scsi/qla2xxx/qla_isr.c b/drivers/scsi/qla2xxx/qla_isr.c
+index d2a4c75..813e9d8 100755
+--- a/drivers/scsi/qla2xxx/qla_isr.c
++++ b/drivers/scsi/qla2xxx/qla_isr.c
+@@ -523,8 +523,9 @@ qla2x00_async_event(scsi_qla_host_t *vha, struct rsp_que *rsp, uint16_t *mb)
+ 	struct device_reg_2xxx __iomem *reg = &ha->iobase->isp;
+ 	struct device_reg_24xx __iomem *reg24 = &ha->iobase->isp24;
+ 	struct device_reg_82xx __iomem *reg82 = &ha->iobase->isp82;
+-	uint32_t	rscn_entry, host_pid;
++	uint32_t	rscn_entry, host_pid, tmp_pid;
+ 	unsigned long	flags;
++	fc_port_t	*fcport = NULL;
+ 
+ 	/* Setup to process RIO completion. */
+ 	handle_cnt = 0;
+@@ -918,6 +919,20 @@ skip_rio:
+ 		if (qla2x00_is_a_vp_did(vha, rscn_entry))
+ 			break;
+ 
++		/*
++		 * Search for the rport related to this RSCN entry and mark it
++		 * as lost.
++		 */
++		list_for_each_entry(fcport, &vha->vp_fcports, list) {
++			if (atomic_read(&fcport->state) != FCS_ONLINE)
++				continue;
++			tmp_pid = fcport->d_id.b24;
++			if (fcport->d_id.b24 == rscn_entry) {
++				qla2x00_mark_device_lost(vha, fcport, 0, 0);
++				break;
++			}
++		}
++
+ 		atomic_set(&vha->loop_down_timer, 0);
+ 		vha->flags.management_server_logged_in = 0;
+ 
+-- 
+2.7.4
+

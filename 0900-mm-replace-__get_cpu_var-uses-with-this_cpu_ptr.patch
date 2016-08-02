@@ -1,0 +1,169 @@
+From a27d19014a214ce94dcfc2cc6c0fb7ad6f6510f2 Mon Sep 17 00:00:00 2001
+From: Christoph Lameter <cl@linux.com>
+Date: Wed, 4 Jun 2014 16:07:56 -0700
+Subject: [PATCH 0900/1168] mm: replace __get_cpu_var uses with this_cpu_ptr
+
+Replace places where __get_cpu_var() is used for an address calculation
+with this_cpu_ptr().
+
+Signed-off-by: Christoph Lameter <cl@linux.com>
+Cc: Tejun Heo <tj@kernel.org>
+Cc: Hugh Dickins <hughd@google.com>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 3c597ab1ede2b97a3e1d71bf1d7a090256f2052b
+---
+ lib/radix-tree.c    | 6 +++---
+ mm/memcontrol.c     | 2 +-
+ mm/memory-failure.c | 2 +-
+ mm/page-writeback.c | 4 ++--
+ mm/slub.c           | 4 ++--
+ mm/swap.c           | 2 +-
+ mm/vmalloc.c        | 2 +-
+ mm/vmstat.c         | 2 +-
+ 8 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/lib/radix-tree.c b/lib/radix-tree.c
+index e796429..d5b7a0f 100644
+--- a/lib/radix-tree.c
++++ b/lib/radix-tree.c
+@@ -215,7 +215,7 @@ radix_tree_node_alloc(struct radix_tree_root *root)
+ 		 * succeed in getting a node here (and never reach
+ 		 * kmem_cache_alloc)
+ 		 */
+-		rtp = &__get_cpu_var(radix_tree_preloads);
++		rtp = this_cpu_ptr(&radix_tree_preloads);
+ 		if (rtp->nr) {
+ 			ret = rtp->nodes[rtp->nr - 1];
+ 			rtp->nodes[rtp->nr - 1] = NULL;
+@@ -271,14 +271,14 @@ int radix_tree_preload(gfp_t gfp_mask)
+ 	int ret = -ENOMEM;
+ 
+ 	preempt_disable();
+-	rtp = &__get_cpu_var(radix_tree_preloads);
++	rtp = this_cpu_ptr(&radix_tree_preloads);
+ 	while (rtp->nr < ARRAY_SIZE(rtp->nodes)) {
+ 		preempt_enable();
+ 		node = kmem_cache_alloc(radix_tree_node_cachep, gfp_mask);
+ 		if (node == NULL)
+ 			goto out;
+ 		preempt_disable();
+-		rtp = &__get_cpu_var(radix_tree_preloads);
++		rtp = this_cpu_ptr(&radix_tree_preloads);
+ 		if (rtp->nr < ARRAY_SIZE(rtp->nodes))
+ 			rtp->nodes[rtp->nr++] = node;
+ 		else
+diff --git a/mm/memcontrol.c b/mm/memcontrol.c
+index 549e121..e43f4ff 100644
+--- a/mm/memcontrol.c
++++ b/mm/memcontrol.c
+@@ -2456,7 +2456,7 @@ static void drain_stock(struct memcg_stock_pcp *stock)
+  */
+ static void drain_local_stock(struct work_struct *dummy)
+ {
+-	struct memcg_stock_pcp *stock = &__get_cpu_var(memcg_stock);
++	struct memcg_stock_pcp *stock = this_cpu_ptr(&memcg_stock);
+ 	drain_stock(stock);
+ 	clear_bit(FLUSHING_CACHED_CHARGE, &stock->flags);
+ }
+diff --git a/mm/memory-failure.c b/mm/memory-failure.c
+index f97d709..8dd5870 100644
+--- a/mm/memory-failure.c
++++ b/mm/memory-failure.c
+@@ -1298,7 +1298,7 @@ static void memory_failure_work_func(struct work_struct *work)
+ 	unsigned long proc_flags;
+ 	int gotten;
+ 
+-	mf_cpu = &__get_cpu_var(memory_failure_cpu);
++	mf_cpu = this_cpu_ptr(&memory_failure_cpu);
+ 	for (;;) {
+ 		spin_lock_irqsave(&mf_cpu->lock, proc_flags);
+ 		gotten = kfifo_get(&mf_cpu->fifo, &entry);
+diff --git a/mm/page-writeback.c b/mm/page-writeback.c
+index a4e02d8..2b422fa 100644
+--- a/mm/page-writeback.c
++++ b/mm/page-writeback.c
+@@ -1504,7 +1504,7 @@ void balance_dirty_pages_ratelimited(struct address_space *mapping)
+ 	 * 1000+ tasks, all of them start dirtying pages at exactly the same
+ 	 * time, hence all honoured too large initial task->nr_dirtied_pause.
+ 	 */
+-	p =  &__get_cpu_var(bdp_ratelimits);
++	p =  this_cpu_ptr(&bdp_ratelimits);
+ 	if (unlikely(current->nr_dirtied >= ratelimit))
+ 		*p = 0;
+ 	else if (unlikely(*p >= ratelimit_pages)) {
+@@ -1516,7 +1516,7 @@ void balance_dirty_pages_ratelimited(struct address_space *mapping)
+ 	 * short-lived tasks (eg. gcc invocations in a kernel build) escaping
+ 	 * the dirty throttling and livelock other long-run dirtiers.
+ 	 */
+-	p = &__get_cpu_var(dirty_throttle_leaks);
++	p = this_cpu_ptr(&dirty_throttle_leaks);
+ 	if (*p > 0 && current->nr_dirtied < ratelimit) {
+ 		unsigned long nr_pages_dirtied;
+ 		nr_pages_dirtied = min(*p, ratelimit - current->nr_dirtied);
+diff --git a/mm/slub.c b/mm/slub.c
+index 09f5d97..caa5e40 100644
+--- a/mm/slub.c
++++ b/mm/slub.c
+@@ -2487,7 +2487,7 @@ redo:
+ 	 * and the retrieval of the tid.
+ 	 */
+ 	preempt_disable();
+-	c = __this_cpu_ptr(s->cpu_slab);
++	c = this_cpu_ptr(s->cpu_slab);
+ 
+ 	/*
+ 	 * The transaction ids are globally unique per cpu and per operation on
+@@ -2744,7 +2744,7 @@ redo:
+ 	 * during the cmpxchg then the free will succedd.
+ 	 */
+ 	preempt_disable();
+-	c = __this_cpu_ptr(s->cpu_slab);
++	c = this_cpu_ptr(s->cpu_slab);
+ 
+ 	tid = c->tid;
+ 	preempt_enable();
+diff --git a/mm/swap.c b/mm/swap.c
+index 6e7459e..37b823d 100644
+--- a/mm/swap.c
++++ b/mm/swap.c
+@@ -406,7 +406,7 @@ void rotate_reclaimable_page(struct page *page)
+ 
+ 		page_cache_get(page);
+ 		local_irq_save(flags);
+-		pvec = &__get_cpu_var(lru_rotate_pvecs);
++		pvec = this_cpu_ptr(&lru_rotate_pvecs);
+ 		if (!pagevec_add(pvec, page))
+ 			pagevec_move_tail(pvec);
+ 		local_irq_restore(flags);
+diff --git a/mm/vmalloc.c b/mm/vmalloc.c
+index 0a77f66..54b3ff6 100644
+--- a/mm/vmalloc.c
++++ b/mm/vmalloc.c
+@@ -1547,7 +1547,7 @@ void vfree(const void *addr)
+ 	if (!addr)
+ 		return;
+ 	if (unlikely(in_interrupt())) {
+-		struct vfree_deferred *p = &__get_cpu_var(vfree_deferred);
++		struct vfree_deferred *p = this_cpu_ptr(&vfree_deferred);
+ 		llist_add((struct llist_node *)addr, &p->list);
+ 		schedule_work(&p->wq);
+ 	} else
+diff --git a/mm/vmstat.c b/mm/vmstat.c
+index e3e9223..87cca85 100644
+--- a/mm/vmstat.c
++++ b/mm/vmstat.c
+@@ -1207,7 +1207,7 @@ int sysctl_stat_interval __read_mostly = HZ;
+ static void vmstat_update(struct work_struct *w)
+ {
+ 	refresh_cpu_vm_stats(smp_processor_id());
+-	schedule_delayed_work(&__get_cpu_var(vmstat_work),
++	schedule_delayed_work(this_cpu_ptr(&vmstat_work),
+ 		round_jiffies_relative(sysctl_stat_interval));
+ }
+ 
+-- 
+2.7.4
+

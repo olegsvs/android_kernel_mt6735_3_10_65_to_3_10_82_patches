@@ -1,0 +1,39 @@
+From 5de71cf8ba00240a4b7d948fb8c6c681d5e54782 Mon Sep 17 00:00:00 2001
+From: SnowCatPDA <snowcat@vpro.ru>
+Date: Thu, 26 May 2016 12:23:05 +0500
+Subject: [PATCH 1155/1168] FIX FTS touchscreen BACK button work
+
+---
+ drivers/input/touchscreen/mediatek/FT6206_X2605/focaltech_driver.c      | 2 +-
+ .../mach/mt6735/X5PRO_6735m/touchpanel/FT6206_X2605/tpd_custom_fts.h    | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/input/touchscreen/mediatek/FT6206_X2605/focaltech_driver.c b/drivers/input/touchscreen/mediatek/FT6206_X2605/focaltech_driver.c
+index c059721..4959b8d 100755
+--- a/drivers/input/touchscreen/mediatek/FT6206_X2605/focaltech_driver.c
++++ b/drivers/input/touchscreen/mediatek/FT6206_X2605/focaltech_driver.c
+@@ -750,7 +750,7 @@ static  void tpd_down(int x, int y, int p) {
+ 	if(x > TPD_RES_X)
+ 	{
+ 		TPD_DEBUG("warning: IC have sampled wrong value.\n");;
+-		return;
++//		return;
+ 	}
+ 	 input_report_key(tpd->dev, BTN_TOUCH, 1);
+ 	 input_report_abs(tpd->dev, ABS_MT_TOUCH_MAJOR, 20);
+diff --git a/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/touchpanel/FT6206_X2605/tpd_custom_fts.h b/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/touchpanel/FT6206_X2605/tpd_custom_fts.h
+index d9960f0..ea43504 100755
+--- a/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/touchpanel/FT6206_X2605/tpd_custom_fts.h
++++ b/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/touchpanel/FT6206_X2605/tpd_custom_fts.h
+@@ -127,7 +127,7 @@ FHD   1920x1080  2key ( (160,2100);(920,2100) )           3key  ( (160,2100);(54
+ #define TPD_DELAY                		(2*HZ/100)
+ #define TPD_RES_X                		720
+ #define TPD_RES_Y                		1280
+-#define TPD_CALIBRATION_MATRIX  		{962,0,0,0,1600,0,0,0};
++//#define TPD_CALIBRATION_MATRIX  		{962,0,0,0,1600,0,0,0};
+ 
+ //#define TPD_HAVE_CALIBRATION
+ //#define TPD_HAVE_TREMBLE_ELIMINATION
+-- 
+2.7.4
+

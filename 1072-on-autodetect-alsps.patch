@@ -1,0 +1,99 @@
+From 9203ceb2873b86fe6adb15084ec74b72182b031c Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Mon, 9 May 2016 15:49:05 +0300
+Subject: [PATCH 1072/1168] on autodetect alsps
+
+---
+ arch/arm64/configs/benefit_m7_defconfig                               | 2 +-
+ drivers/misc/mediatek/alsps/inc/stk_cust_alsps.h                      | 2 +-
+ .../mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x_driver/cust_alsps.c | 2 +-
+ include/config/auto.conf                                              | 1 +
+ include/config/mtk/auto/detect/alsps.h                                | 0
+ include/generated/autoconf.h                                          | 1 +
+ include/generated/compile.h                                           | 4 ++--
+ 7 files changed, 7 insertions(+), 5 deletions(-)
+ create mode 100644 include/config/mtk/auto/detect/alsps.h
+
+diff --git a/arch/arm64/configs/benefit_m7_defconfig b/arch/arm64/configs/benefit_m7_defconfig
+index 33c6352..8d380a8 100644
+--- a/arch/arm64/configs/benefit_m7_defconfig
++++ b/arch/arm64/configs/benefit_m7_defconfig
+@@ -1287,7 +1287,7 @@ CONFIG_MTK_SIM2=y
+ # CONFIG_MTK_GP2AP002S00F is not set
+ # CONFIG_MTK_APM_16D is not set
+ # CONFIG_MTK_EPL2182 is not set //fc
+-CONFIG_MTK_EPL2182_NEW=y
++CONFIG_MTK_EPL2182_NEW=n
+ CONFIG_MTK_STK3X1X_NEW=n
+ CONFIG_MTK_STK3X1X_DRIVER=y
+ # CONFIG_MTK_CM36652_NEW is not set
+diff --git a/drivers/misc/mediatek/alsps/inc/stk_cust_alsps.h b/drivers/misc/mediatek/alsps/inc/stk_cust_alsps.h
+index adcbeee..5b8f47c 100644
+--- a/drivers/misc/mediatek/alsps/inc/stk_cust_alsps.h
++++ b/drivers/misc/mediatek/alsps/inc/stk_cust_alsps.h
+@@ -4,7 +4,7 @@
+ #include <linux/types.h>
+ 
+ #define C_CUST_ALS_LEVEL    16
+-#define C_CUST_I2C_ADDR_NUM 4
++#define C_CUST_I2C_ADDR_NUM 2
+ 
+ #define MAX_THRESHOLD_HIGH 0xffff
+ #define MIN_THRESHOLD_LOW 0x0
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x_driver/cust_alsps.c b/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x_driver/cust_alsps.c
+index 3b3af12..14a0df6 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x_driver/cust_alsps.c
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x_driver/cust_alsps.c
+@@ -46,7 +46,7 @@ static struct alsps_hw cust_alsps_hw = {
+ 	.polling_mode_als =1,   
+     .power_id   = MT65XX_POWER_NONE,    /*LDO is not used*/
+     .power_vol  = VOL_DEFAULT,          /*LDO is not used*/
+-    .i2c_addr   = {0x48, 0x00, 0x00, 0x00},	/*STK3x1x*/
++    //.i2c_addr   = {0x48, 0x00, 0x00, 0x00},	/*STK3x1x*/
+    // .i2c_addr   = {0x48, 0x00, 0x00, 0x00},	/*STK3x1x*/
+     .als_level  = {5, 9, 36, 59, 82, 132, 205, 273, 500, 845, 1136, 1545, 2364, 4655, 6982},	/* als_code */
+     .als_value  = {10, 10, 40, 65, 90, 145, 225, 300, 550, 930, 1250, 1700, 2600, 5120, 7680, 10240 },    /* lux */
+diff --git a/include/config/auto.conf b/include/config/auto.conf
+index 52be552..45aadd5 100644
+--- a/include/config/auto.conf
++++ b/include/config/auto.conf
+@@ -513,6 +513,7 @@ CONFIG_NET_CLS_IND=y
+ CONFIG_CUSTOM_KERNEL_EXTMD=""
+ CONFIG_MTD_MAP_BANK_WIDTH_1=y
+ CONFIG_IP6_NF_MATCH_FRAG=y
++CONFIG_MTK_AUTO_DETECT_ALSPS=y
+ CONFIG_EPOLL=y
+ CONFIG_CRYPTO_LZO=y
+ CONFIG_SND_PCM=y
+diff --git a/include/config/mtk/auto/detect/alsps.h b/include/config/mtk/auto/detect/alsps.h
+new file mode 100644
+index 0000000..e69de29
+diff --git a/include/generated/autoconf.h b/include/generated/autoconf.h
+index bec13ab..4a0f282 100644
+--- a/include/generated/autoconf.h
++++ b/include/generated/autoconf.h
+@@ -515,6 +515,7 @@
+ #define CONFIG_CUSTOM_KERNEL_EXTMD ""
+ #define CONFIG_MTD_MAP_BANK_WIDTH_1 1
+ #define CONFIG_IP6_NF_MATCH_FRAG 1
++#define CONFIG_MTK_AUTO_DETECT_ALSPS 1
+ #define CONFIG_EPOLL 1
+ #define CONFIG_CRYPTO_LZO 1
+ #define CONFIG_SND_PCM 1
+diff --git a/include/generated/compile.h b/include/generated/compile.h
+index b8730e6..4168b68 100644
+--- a/include/generated/compile.h
++++ b/include/generated/compile.h
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 86 */
++/* This file is auto generated, version 90 */
+ /* SMP PREEMPT */
+ #define UTS_MACHINE "arm64"
+-#define UTS_VERSION "#86 SMP PREEMPT Mon May 9 15:33:33 MSK 2016"
++#define UTS_VERSION "#90 SMP PREEMPT Mon May 9 15:45:42 MSK 2016"
+ #define LINUX_COMPILE_BY "olegsvs"
+ #define LINUX_COMPILE_HOST "olegsvs-develop"
+ #define LINUX_COMPILER "gcc version 4.9 20150123 (prerelease) (GCC) "
+-- 
+2.7.4
+

@@ -1,0 +1,64 @@
+From e0b298deb6bb42c06e935292bb2a1e4f2d83b44b Mon Sep 17 00:00:00 2001
+From: Sudip Mukherjee <sudipm.mukherjee@gmail.com>
+Date: Tue, 24 Mar 2015 16:29:32 +0530
+Subject: [PATCH 0485/1168] staging: panel: fix lcd type
+
+commit 2c20d92dad5db6440cfa88d811b69fd605240ce4 upstream.
+
+the lcd type as defined in the Kconfig is not matching in the code.
+as a result the rs, rw and en pins were getting interchanged.
+Kconfig defines the value of PANEL_LCD to be 1 if we select custom
+configuration but in the code LCD_TYPE_CUSTOM is defined as 5.
+
+my hardware is LCD_TYPE_CUSTOM, but the pins were assigned to it
+as pins of LCD_TYPE_OLD, and it was not working.
+Now values are corrected with referenece to the values defined in
+Kconfig and it is working.
+checked on JHD204A lcd with LCD_TYPE_CUSTOM configuration.
+
+Signed-off-by: Sudip Mukherjee <sudip@vectorindia.org>
+Acked-by: Willy Tarreau <w@1wt.eu>
+[wt: backport to 3.10 and 3.14]
+Signed-off-by: Willy Tarreau <w@1wt.eu>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 9057473a9bf59c260177ba0fd11a6cd641ce9ef7
+---
+ drivers/staging/panel/panel.c | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/staging/panel/panel.c b/drivers/staging/panel/panel.c
+index c54df39..4d0a87b 100755
+--- a/drivers/staging/panel/panel.c
++++ b/drivers/staging/panel/panel.c
+@@ -275,11 +275,11 @@ static unsigned char lcd_bits[LCD_PORTS][LCD_BITS][BIT_STATES];
+  * LCD types
+  */
+ #define LCD_TYPE_NONE		0
+-#define LCD_TYPE_OLD		1
+-#define LCD_TYPE_KS0074		2
+-#define LCD_TYPE_HANTRONIX	3
+-#define LCD_TYPE_NEXCOM		4
+-#define LCD_TYPE_CUSTOM		5
++#define LCD_TYPE_CUSTOM		1
++#define LCD_TYPE_OLD		2
++#define LCD_TYPE_KS0074		3
++#define LCD_TYPE_HANTRONIX	4
++#define LCD_TYPE_NEXCOM		5
+ 
+ /*
+  * keypad types
+@@ -457,8 +457,7 @@ MODULE_PARM_DESC(keypad_enabled, "Deprecated option, use keypad_type instead");
+ static int lcd_type = -1;
+ module_param(lcd_type, int, 0000);
+ MODULE_PARM_DESC(lcd_type,
+-		 "LCD type: 0=none, 1=old //, 2=serial ks0074, "
+-		 "3=hantronix //, 4=nexcom //, 5=compiled-in");
++		"LCD type: 0=none, 1=compiled-in, 2=old, 3=serial ks0074, 4=hantronix, 5=nexcom");
+ 
+ static int lcd_proto = -1;
+ module_param(lcd_proto, int, 0000);
+-- 
+2.7.4
+

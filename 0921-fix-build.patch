@@ -1,0 +1,25 @@
+From c831be076aebc16659030f0fbd3ebca1c82fe135 Mon Sep 17 00:00:00 2001
+From: Stefan Guendhoer <stefan@guendhoer.com>
+Date: Fri, 8 Jan 2016 00:34:03 +0000
+Subject: [PATCH 0921/1168] fix build
+
+Former-commit-id: d83f19cf30b51ea661b4c25b2ce49e15a0ebe641
+---
+ arch/arm64/include/asm/thread_info.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/include/asm/thread_info.h b/arch/arm64/include/asm/thread_info.h
+index fffaa53..44998a7 100644
+--- a/arch/arm64/include/asm/thread_info.h
++++ b/arch/arm64/include/asm/thread_info.h
+@@ -136,6 +136,7 @@ static inline struct thread_info *current_thread_info(void)
+ #define _TIF_SYSCALL_TRACE	(1 << TIF_SYSCALL_TRACE)
+ #define _TIF_SYSCALL_AUDIT	(1 << TIF_SYSCALL_AUDIT)
+ #define _TIF_SYSCALL_TRACEPOINT	(1 << TIF_SYSCALL_TRACEPOINT)
++#define _TIF_POLLING_NRFLAG	(1 << TIF_POLLING_NRFLAG)
+ #define _TIF_SECCOMP		(1 << TIF_SECCOMP)
+ #define _TIF_POLLING_NRFLAG	(1 << TIF_POLLING_NRFLAG)
+ #define _TIF_32BIT		(1 << TIF_32BIT)
+-- 
+2.7.4
+

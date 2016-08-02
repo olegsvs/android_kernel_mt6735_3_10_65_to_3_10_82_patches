@@ -1,0 +1,62 @@
+From 1211c143fb920b2b40ebd6b73112b28d93416979 Mon Sep 17 00:00:00 2001
+From: Charles Keepax <ckeepax@opensource.wolfsonmicro.com>
+Date: Thu, 6 Nov 2014 15:49:41 +0000
+Subject: [PATCH 0996/1168] asix: Do full reset during ax88772_bind
+
+[ Upstream commit 436c2a5036b6ffe813310df2cf327d3b69be0734 ]
+
+commit 3cc81d85ee01 ("asix: Don't reset PHY on if_up for ASIX 88772")
+causes the ethernet on Arndale to no longer function. This appears to
+be because the Arndale ethernet requires a full reset before it will
+function correctly, however simply reverting the above patch causes
+problems with ethtool settings getting reset.
+
+It seems the problem is that the ethernet is not properly reset during
+bind, and indeed the code in ax88772_bind that resets the device is a
+very small subset of the actual ax88772_reset function. This patch uses
+ax88772_reset in place of the existing reset code in ax88772_bind which
+removes some code duplication and fixes the ethernet on Arndale.
+
+It is still possible that the original patch causes some issues with
+suspend and resume but that seems like a separate issue and I haven't
+had a chance to test that yet.
+
+Signed-off-by: Charles Keepax <ckeepax@opensource.wolfsonmicro.com>
+Tested-by: Riku Voipio <riku.voipio@linaro.org>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 6b211921fc41be86d47dcf8beadf9d64ef1b3d14
+---
+ drivers/net/usb/asix_devices.c | 14 +-------------
+ 1 file changed, 1 insertion(+), 13 deletions(-)
+
+diff --git a/drivers/net/usb/asix_devices.c b/drivers/net/usb/asix_devices.c
+index 02314fa..05e8bd7 100755
+--- a/drivers/net/usb/asix_devices.c
++++ b/drivers/net/usb/asix_devices.c
+@@ -466,19 +466,7 @@ static int ax88772_bind(struct usbnet *dev, struct usb_interface *intf)
+ 		return ret;
+ 	}
+ 
+-	ret = asix_sw_reset(dev, AX_SWRESET_IPPD | AX_SWRESET_PRL);
+-	if (ret < 0)
+-		return ret;
+-
+-	msleep(150);
+-
+-	ret = asix_sw_reset(dev, AX_SWRESET_CLEAR);
+-	if (ret < 0)
+-		return ret;
+-
+-	msleep(150);
+-
+-	ret = asix_sw_reset(dev, embd_phy ? AX_SWRESET_IPRL : AX_SWRESET_PRTE);
++	ax88772_reset(dev);
+ 
+ 	/* Read PHYID register *AFTER* the PHY was reset properly */
+ 	phyid = asix_get_phyid(dev);
+-- 
+2.7.4
+

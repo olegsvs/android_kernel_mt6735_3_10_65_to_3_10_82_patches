@@ -1,0 +1,30 @@
+From 1d63b4d888fb5c0828dca1b3fcb4f2aa88fc6907 Mon Sep 17 00:00:00 2001
+From: thewisenerd <contact.twn@openmailbox.org>
+Date: Wed, 11 Nov 2015 21:39:22 +0800
+Subject: [PATCH 0928/1168] pocket_mod: sysfs: enable: sysfs can't be world
+ writable
+
+Signed-off-by: thewisenerd <thewisenerd@protonmail.com>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: f5be997857e1cd65ee003b12da86f92b5f7b1f6f
+---
+ drivers/misc/pocket_mod.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/misc/pocket_mod.c b/drivers/misc/pocket_mod.c
+index 68cdaef..ff31e01 100644
+--- a/drivers/misc/pocket_mod.c
++++ b/drivers/misc/pocket_mod.c
+@@ -74,7 +74,7 @@ static ssize_t pocket_mod_set(struct device *dev,
+ 	return size;
+ }
+ 
+-static DEVICE_ATTR(pocket_mod_enable, 0777,
++static DEVICE_ATTR(pocket_mod_enable, (S_IWUSR|S_IRUGO),
+ 		pocket_mod_show, pocket_mod_set);
+ 
+ static struct attribute *pocket_mod_attributes[] =
+-- 
+2.7.4
+

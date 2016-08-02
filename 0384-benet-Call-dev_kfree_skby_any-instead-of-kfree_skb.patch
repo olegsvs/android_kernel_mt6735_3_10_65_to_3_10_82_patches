@@ -1,0 +1,36 @@
+From 1a62f4a9a1b513edef6e82bde1cef7b0b7f9a914 Mon Sep 17 00:00:00 2001
+From: "Eric W. Biederman" <ebiederm@xmission.com>
+Date: Tue, 11 Mar 2014 14:19:50 -0700
+Subject: [PATCH 0384/1168] benet: Call dev_kfree_skby_any instead of
+ kfree_skb.
+
+Replace free_skb with dev_kfree_skb_any in be_tx_compl_process as
+which can be called in hard irq by netpoll, softirq context
+by normal napi polling, and in normal sleepable context
+by the network device close method.
+
+Signed-off-by: "Eric W. Biederman" <ebiederm@xmission.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+Former-commit-id: c6406ab6b926e16b9475c8046a5eb2acd455e921
+---
+ drivers/net/ethernet/emulex/benet/be_main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/ethernet/emulex/benet/be_main.c b/drivers/net/ethernet/emulex/benet/be_main.c
+index d81a7db..88e85cb 100755
+--- a/drivers/net/ethernet/emulex/benet/be_main.c
++++ b/drivers/net/ethernet/emulex/benet/be_main.c
+@@ -1767,7 +1767,7 @@ static u16 be_tx_compl_process(struct be_adapter *adapter,
+ 		queue_tail_inc(txq);
+ 	} while (cur_index != last_index);
+ 
+-	kfree_skb(sent_skb);
++	dev_kfree_skb_any(sent_skb);
+ 	return num_wrbs;
+ }
+ 
+-- 
+2.7.4
+

@@ -1,0 +1,45 @@
+From 93c7cc13d7b86cb246d6abd2c01560cb6f41d1b2 Mon Sep 17 00:00:00 2001
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Date: Sat, 14 Mar 2015 05:34:56 +0000
+Subject: [PATCH 0301/1168] rxrpc: bogus MSG_PEEK test in rxrpc_recvmsg()
+
+[ Upstream commit 7d985ed1dca5c90535d67ce92ef6ca520302340a ]
+
+[I would really like an ACK on that one from dhowells; it appears to be
+quite straightforward, but...]
+
+MSG_PEEK isn't passed to ->recvmsg() via msg->msg_flags; as the matter of
+fact, neither the kernel users of rxrpc, nor the syscalls ever set that bit
+in there.  It gets passed via flags; in fact, another such check in the same
+function is done correctly - as flags & MSG_PEEK.
+
+It had been that way (effectively disabled) for 8 years, though, so the patch
+needs beating up - that case had never been tested.  If it is correct, it's
+-stable fodder.
+
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 2e825b98766277bd13085b3485a2245781146e3c
+---
+ net/rxrpc/ar-recvmsg.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/rxrpc/ar-recvmsg.c b/net/rxrpc/ar-recvmsg.c
+index 898492a..5cc2da5 100644
+--- a/net/rxrpc/ar-recvmsg.c
++++ b/net/rxrpc/ar-recvmsg.c
+@@ -87,7 +87,7 @@ int rxrpc_recvmsg(struct kiocb *iocb, struct socket *sock,
+ 		if (!skb) {
+ 			/* nothing remains on the queue */
+ 			if (copied &&
+-			    (msg->msg_flags & MSG_PEEK || timeo == 0))
++			    (flags & MSG_PEEK || timeo == 0))
+ 				goto out;
+ 
+ 			/* wait for a message to turn up */
+-- 
+2.7.4
+

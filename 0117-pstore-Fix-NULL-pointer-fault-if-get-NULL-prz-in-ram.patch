@@ -1,0 +1,43 @@
+From 1b51e6bcf52e2ba4cc110c7065da24b66936a0b0 Mon Sep 17 00:00:00 2001
+From: Liu ShuoX <shuox.liu@intel.com>
+Date: Mon, 17 Mar 2014 13:57:49 -0700
+Subject: [PATCH 0117/1168] pstore: Fix NULL pointer fault if get NULL prz in
+ ramoops_get_next_prz
+
+commit b0aa931fb84431394d995472d0af2a6c2b61064d upstream.
+
+ramoops_get_next_prz get the prz according the paramters. If it get a
+uninitialized prz, access its members by following persistent_ram_old_size(prz)
+will cause a NULL pointer crash.
+Ex: if ftrace_size is 0, fprz will be NULL.
+
+Fix it by return NULL in advance.
+
+Signed-off-by: Liu ShuoX <shuox.liu@intel.com>
+Acked-by: Kees Cook <keescook@chromium.org>
+Signed-off-by: Tony Luck <tony.luck@intel.com>
+Cc: HuKeping <hukeping@huawei.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: aca2ab7a1832379e859748fab298db6f282f410f
+---
+ fs/pstore/ram.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/fs/pstore/ram.c b/fs/pstore/ram.c
+index 0d9eed8..f721e47 100644
+--- a/fs/pstore/ram.c
++++ b/fs/pstore/ram.c
+@@ -133,6 +133,8 @@ ramoops_get_next_prz(struct persistent_ram_zone *przs[], uint *c, uint max,
+ 		return NULL;
+ 
+ 	prz = przs[i];
++	if (!prz)
++		return NULL;
+ 
+ 	/* Update old/shadowed buffer. */
+ 	if (update)
+-- 
+2.7.4
+

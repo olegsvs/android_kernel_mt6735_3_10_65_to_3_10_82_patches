@@ -1,0 +1,38 @@
+From 2d78e501d8f313a8561a9f01976e1a00c9419ffd Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Sun, 15 May 2016 14:02:31 +0300
+Subject: [PATCH 1136/1168] Revert "write cfg to touchscreen"
+
+This reverts commit 6eeab978d5cd224ce9662d7f09f4a8b8e2bf9cba.
+
+Conflicts:
+	drivers/input/touchscreen/mediatek/GT915_HD/tpd_custom_gt9xx.h
+---
+ drivers/input/touchscreen/mediatek/GT915_HD/tpd_custom_gt9xx.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/input/touchscreen/mediatek/GT915_HD/tpd_custom_gt9xx.h b/drivers/input/touchscreen/mediatek/GT915_HD/tpd_custom_gt9xx.h
+index e22ba38..e7cbd4c 100755
+--- a/drivers/input/touchscreen/mediatek/GT915_HD/tpd_custom_gt9xx.h
++++ b/drivers/input/touchscreen/mediatek/GT915_HD/tpd_custom_gt9xx.h
+@@ -136,12 +136,17 @@ extern s32 gtp_i2c_read_dbl_check(struct i2c_client *client, u16 addr, u8 *rxbuf
+ 
+ <<<<<<< HEAD
+ <<<<<<< HEAD
++<<<<<<< HEAD
+ #define TPD_PROXIMITY
+ //#define TPD_HAVE_BUTTON             // report key as coordinate,Vibration feedback
+ =======
+ //#define TPD_PROXIMITY
+ #define TPD_HAVE_BUTTON            // report key as coordinate,Vibration feedback
+ >>>>>>> parent of 6eeab97... write cfg to touchscreen
++=======
++//#define TPD_PROXIMITY
++#define TPD_HAVE_BUTTON            // report key as coordinate,Vibration feedback
++>>>>>>> parent of 6eeab97... write cfg to touchscreen
+ #define TPD_WARP_X                  // mirrored x coordinate
+ #define TPD_WARP_Y                  // mirrored y coordinate
+ =======
+-- 
+2.7.4
+

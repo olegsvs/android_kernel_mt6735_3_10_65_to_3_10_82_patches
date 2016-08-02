@@ -1,0 +1,40 @@
+From af0efda81fa8a4e6659c7215e9fd862a043b1576 Mon Sep 17 00:00:00 2001
+From: Richard Weinberger <richard@nod.at>
+Date: Wed, 10 Dec 2014 13:53:51 +0100
+Subject: [PATCH 0044/1168] um: Skip futex_atomic_cmpxchg_inatomic() test
+
+commit f911d731054ab3d82ee72a16b889e17ca3a2332a upstream.
+
+futex_atomic_cmpxchg_inatomic() does not work on UML because
+it triggers a copy_from_user() in kernel context.
+On UML copy_from_user() can only be used if the kernel was called
+by a real user space process such that UML can use ptrace()
+to fetch the value.
+
+Reported-by: Miklos Szeredi <miklos@szeredi.hu>
+Suggested-by: Geert Uytterhoeven <geert@linux-m68k.org>
+Signed-off-by: Richard Weinberger <richard@nod.at>
+Tested-by: Daniel Walter <d.walter@0x90.at>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 64c120e063eb4382f7002c0ca367de8584f342e3
+---
+ arch/um/Kconfig.common | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/um/Kconfig.common b/arch/um/Kconfig.common
+index bceee66..d1ff46c 100644
+--- a/arch/um/Kconfig.common
++++ b/arch/um/Kconfig.common
+@@ -8,6 +8,7 @@ config UML
+ 	default y
+ 	select HAVE_GENERIC_HARDIRQS
+ 	select HAVE_UID16
++	select HAVE_FUTEX_CMPXCHG if FUTEX
+ 	select GENERIC_IRQ_SHOW
+ 	select GENERIC_CPU_DEVICES
+ 	select GENERIC_IO
+-- 
+2.7.4
+

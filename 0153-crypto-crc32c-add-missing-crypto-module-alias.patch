@@ -1,0 +1,39 @@
+From 0a8dce3e0dda651dc5e45934a98b3a3bbf978f59 Mon Sep 17 00:00:00 2001
+From: Mathias Krause <minipli@googlemail.com>
+Date: Tue, 10 Feb 2015 01:14:07 +0100
+Subject: [PATCH 0153/1168] crypto: crc32c - add missing crypto module alias
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The backport of commit 5d26a105b5a7 ("crypto: prefix module autoloading
+with "crypto-"") lost the MODULE_ALIAS_CRYPTO() annotation of crc32c.c.
+Add it to fix the reported filesystem related regressions.
+
+Signed-off-by: Mathias Krause <minipli@googlemail.com>
+Reported-by: Philip Müller <philm@manjaro.org>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Rob McCathie <rob@manjaro.org>
+Cc: Luis Henriques <luis.henriques@canonical.com>
+Cc: Kamal Mostafa <kamal@canonical.com>
+Cc: Jiri Slaby <jslaby@suse.cz>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: b342e9f3d84026e102b89ad5075ce468dc340e97
+---
+ crypto/crc32c.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/crypto/crc32c.c b/crypto/crc32c.c
+index 06f7018..238f0e6 100644
+--- a/crypto/crc32c.c
++++ b/crypto/crc32c.c
+@@ -170,3 +170,4 @@ module_exit(crc32c_mod_fini);
+ MODULE_AUTHOR("Clay Haapala <chaapala@cisco.com>");
+ MODULE_DESCRIPTION("CRC32c (Castagnoli) calculations wrapper for lib/crc32c");
+ MODULE_LICENSE("GPL");
++MODULE_ALIAS_CRYPTO("crc32c");
+-- 
+2.7.4
+

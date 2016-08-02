@@ -1,0 +1,77 @@
+From 35d93431a1ce2e6f3bd9862069f92aeb44cbc73a Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Mon, 9 May 2016 22:16:47 +0300
+Subject: [PATCH 033/117] rm68200 ver0.3_cpt2_fix
+
+---
+ .../lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c  | 16 ++++++----------
+ include/generated/compile.h                              |  4 ++--
+ 2 files changed, 8 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c b/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c
+index ac3e6af..2523c35 100644
+--- a/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c
+@@ -680,8 +680,8 @@ static unsigned int lcm_compare_id(void)
+ 
+ 		#if defined(BUILD_LK)
+ 		printf("rm68200a %s id1 = 0x%04x, id2 = 0x%04x\n", __func__, id1,id2);
+-		#else
+-		printk("rm68200a %s id1 = 0x%04x, id2 = 0x%04x\n", __func__, id1,id2);
++
++	//	printk("rm68200a %s id1 = 0x%04x, id2 = 0x%04x\n", __func__, id1,id2);
+ 		#endif
+ 		return (LCM_RM68200_ID == id1)?1:0;
+ 
+@@ -693,7 +693,7 @@ static unsigned int lcm_esd_recover(void)
+ 	unsigned int data_array1[16];
+ 
+ #ifndef BUILD_LK
+-    printk("RM68190 lcm_esd_recover enter\n");
++   // printk("RM68190 lcm_esd_recover enter\n");
+ #endif
+     
+ 
+@@ -727,22 +727,18 @@ static unsigned int lcm_esd_check(void)
+    read_reg_v2(0x0a, buffer, 1);
+    
+ #ifndef BUILD_LK
+-    printk("RM68190 lcm_esd_check enter %x\n",buffer[0]);
++  //  printk("RM68190 lcm_esd_check enter %x\n",buffer[0]);
+ #endif
+ #ifndef BUILD_LK
+         if(buffer[0] == 0x9C)
+         {
+-          #ifndef BUILD_LK
+-          printk("RM68190 lcm_esd_check false \n");
+-          #endif
++
+ 
+             return false;
+         }
+         else
+         {      
+-           #ifndef BUILD_LK
+-          printk("RM68190 lcm_esd_check true \n");
+-          #endif
++          
+            //lcm_esd_recover();
+             return true;
+         }
+diff --git a/include/generated/compile.h b/include/generated/compile.h
+index 979a02f..53f184c 100644
+--- a/include/generated/compile.h
++++ b/include/generated/compile.h
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 12 */
++/* This file is auto generated, version 13 */
+ /* SMP PREEMPT */
+ #define UTS_MACHINE "arm64"
+-#define UTS_VERSION "#12 SMP PREEMPT Mon May 9 22:11:40 MSK 2016"
++#define UTS_VERSION "#13 SMP PREEMPT Mon May 9 22:16:34 MSK 2016"
+ #define LINUX_COMPILE_BY "olegsvs"
+ #define LINUX_COMPILE_HOST "olegsvs-develop"
+ #define LINUX_COMPILER "gcc version 4.9 20150123 (prerelease) (GCC) "
+-- 
+2.7.4
+

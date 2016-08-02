@@ -1,0 +1,39 @@
+From 948a263a4af502cfade63c4d92e8240cd2436908 Mon Sep 17 00:00:00 2001
+From: Sowmini Varadhan <sowmini.varadhan@oracle.com>
+Date: Tue, 21 Apr 2015 10:30:41 -0400
+Subject: [PATCH 0621/1168] sparc: Use GFP_ATOMIC in ldc_alloc_exp_dring() as
+ it can be called in softirq context
+
+Upstream commit 671d773297969bebb1732e1cdc1ec03aa53c6be2
+
+Since it is possible for vnet_event_napi to end up doing
+vnet_control_pkt_engine -> ... -> vnet_send_attr ->
+vnet_port_alloc_tx_ring -> ldc_alloc_exp_dring -> kzalloc()
+(i.e., in softirq context), kzalloc() should be called with
+GFP_ATOMIC from ldc_alloc_exp_dring.
+
+Signed-off-by: Sowmini Varadhan <sowmini.varadhan@oracle.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 781a2e61939b611d7785a0f69fabf6cbc97870b2
+---
+ arch/sparc/kernel/ldc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/sparc/kernel/ldc.c b/arch/sparc/kernel/ldc.c
+index fa4c900..62983d7 100644
+--- a/arch/sparc/kernel/ldc.c
++++ b/arch/sparc/kernel/ldc.c
+@@ -2306,7 +2306,7 @@ void *ldc_alloc_exp_dring(struct ldc_channel *lp, unsigned int len,
+ 	if (len & (8UL - 1))
+ 		return ERR_PTR(-EINVAL);
+ 
+-	buf = kzalloc(len, GFP_KERNEL);
++	buf = kzalloc(len, GFP_ATOMIC);
+ 	if (!buf)
+ 		return ERR_PTR(-ENOMEM);
+ 
+-- 
+2.7.4
+

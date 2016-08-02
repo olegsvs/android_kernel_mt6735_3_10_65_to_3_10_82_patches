@@ -1,0 +1,51 @@
+From a6e642020a0fa92996308e7ecde40aa1e2a48a54 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Christian=20K=C3=B6nig?= <christian.koenig@amd.com>
+Date: Thu, 19 Feb 2015 09:40:28 +0100
+Subject: [PATCH 0312/1168] drm/radeon: drop setting UPLL to sleep mode
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+commit a17d4996e051e78d164989b894608cf37cd5110b upstream.
+
+Just keep it working, seems to fix some PLL problems.
+
+Bug: https://bugs.freedesktop.org/show_bug.cgi?id=73378
+
+Signed-off-by: Christian König <christian.koenig@amd.com>
+Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 950b6848bfe0529dfa6e609ec718194f5aaecb6f
+---
+ drivers/gpu/drm/radeon/si.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/gpu/drm/radeon/si.c b/drivers/gpu/drm/radeon/si.c
+index 87dbbb6..2410c38 100755
+--- a/drivers/gpu/drm/radeon/si.c
++++ b/drivers/gpu/drm/radeon/si.c
+@@ -5704,8 +5704,7 @@ int si_set_uvd_clocks(struct radeon_device *rdev, u32 vclk, u32 dclk)
+ 	WREG32_P(CG_UPLL_FUNC_CNTL, UPLL_BYPASS_EN_MASK, ~UPLL_BYPASS_EN_MASK);
+ 
+ 	if (!vclk || !dclk) {
+-		/* keep the Bypass mode, put PLL to sleep */
+-		WREG32_P(CG_UPLL_FUNC_CNTL, UPLL_SLEEP_MASK, ~UPLL_SLEEP_MASK);
++		/* keep the Bypass mode */
+ 		return 0;
+ 	}
+ 
+@@ -5721,8 +5720,7 @@ int si_set_uvd_clocks(struct radeon_device *rdev, u32 vclk, u32 dclk)
+ 	/* set VCO_MODE to 1 */
+ 	WREG32_P(CG_UPLL_FUNC_CNTL, UPLL_VCO_MODE_MASK, ~UPLL_VCO_MODE_MASK);
+ 
+-	/* toggle UPLL_SLEEP to 1 then back to 0 */
+-	WREG32_P(CG_UPLL_FUNC_CNTL, UPLL_SLEEP_MASK, ~UPLL_SLEEP_MASK);
++	/* disable sleep mode */
+ 	WREG32_P(CG_UPLL_FUNC_CNTL, 0, ~UPLL_SLEEP_MASK);
+ 
+ 	/* deassert UPLL_RESET */
+-- 
+2.7.4
+

@@ -1,0 +1,28 @@
+From 21797d6a9d744916f7a9f9ba7e6e67839d713a17 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Sun, 15 May 2016 22:14:41 +0300
+Subject: [PATCH 1145/1168] Revert "write cfg to touchscreen"
+
+This reverts commit 6fc0f08e650a996ea7a85d1aff08562cc60d6e70.
+---
+ drivers/input/touchscreen/mediatek/GT915_HD/tpd_custom_gt9xx.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/input/touchscreen/mediatek/GT915_HD/tpd_custom_gt9xx.h b/drivers/input/touchscreen/mediatek/GT915_HD/tpd_custom_gt9xx.h
+index f6d7288..b57c1be 100755
+--- a/drivers/input/touchscreen/mediatek/GT915_HD/tpd_custom_gt9xx.h
++++ b/drivers/input/touchscreen/mediatek/GT915_HD/tpd_custom_gt9xx.h
+@@ -136,8 +136,8 @@ extern s32 gtp_i2c_read_dbl_check(struct i2c_client *client, u16 addr, u8 *rxbuf
+ 
+ //#define TPD_PROXIMITY
+ #define TPD_HAVE_BUTTON            // report key as coordinate,Vibration feedback
+-#define TPD_WARP_X                  // mirrored x coordinate
+-#define TPD_WARP_Y                  // mirrored y coordinate
++//#define TPD_WARP_X                  // mirrored x coordinate
++//#define TPD_WARP_Y                  // mirrored y coordinate
+ #define GTP_DEBUG_ON          1
+ #define GTP_DEBUG_ARRAY_ON    1
+ #define GTP_DEBUG_FUNC_ON     1
+-- 
+2.7.4
+

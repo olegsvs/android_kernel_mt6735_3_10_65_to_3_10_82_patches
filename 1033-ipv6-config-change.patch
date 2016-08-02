@@ -1,0 +1,54 @@
+From 78f0c0d93385ae11fa75aa93a5fb074de2244824 Mon Sep 17 00:00:00 2001
+From: Stefan Guendhoer <stefan@guendhoer.com>
+Date: Sat, 20 Feb 2016 16:23:18 +0100
+Subject: [PATCH 1033/1168] ipv6 config change
+
+Former-commit-id: 6b09e9ecd28042f6c5bac2994e976d7879cf2c70
+---
+ arch/arm64/configs/0909p8000_defconfig         | 2 +-
+ arch/arm64/configs/cyanogenmod_p8000_defconfig | 2 +-
+ arch/arm64/configs/p8000_defconfig             | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/configs/0909p8000_defconfig b/arch/arm64/configs/0909p8000_defconfig
+index a49d0a2..4ee1ae2 100644
+--- a/arch/arm64/configs/0909p8000_defconfig
++++ b/arch/arm64/configs/0909p8000_defconfig
+@@ -468,7 +468,7 @@ CONFIG_DEFAULT_TCP_CONG="cubic"
+ # CONFIG_TCP_MD5SIG is not set
+ CONFIG_IPV6=y
+ CONFIG_IPV6_PRIVACY=y
+-CONFIG_IPV6_ROUTER_PREF=y
++CONFIG_IPV6_ROUTER_PREF=n
+ CONFIG_IPV6_ROUTE_INFO=y
+ CONFIG_IPV6_OPTIMISTIC_DAD=y
+ CONFIG_INET6_AH=y
+diff --git a/arch/arm64/configs/cyanogenmod_p8000_defconfig b/arch/arm64/configs/cyanogenmod_p8000_defconfig
+index 2f32407..0c650e7 100644
+--- a/arch/arm64/configs/cyanogenmod_p8000_defconfig
++++ b/arch/arm64/configs/cyanogenmod_p8000_defconfig
+@@ -468,7 +468,7 @@ CONFIG_DEFAULT_TCP_CONG="cubic"
+ # CONFIG_TCP_MD5SIG is not set
+ CONFIG_IPV6=y
+ CONFIG_IPV6_PRIVACY=y
+-CONFIG_IPV6_ROUTER_PREF=y
++CONFIG_IPV6_ROUTER_PREF=n
+ CONFIG_IPV6_ROUTE_INFO=y
+ CONFIG_IPV6_OPTIMISTIC_DAD=y
+ CONFIG_INET6_AH=y
+diff --git a/arch/arm64/configs/p8000_defconfig b/arch/arm64/configs/p8000_defconfig
+index 87140fc..897b79f 100644
+--- a/arch/arm64/configs/p8000_defconfig
++++ b/arch/arm64/configs/p8000_defconfig
+@@ -468,7 +468,7 @@ CONFIG_DEFAULT_TCP_CONG="cubic"
+ # CONFIG_TCP_MD5SIG is not set
+ CONFIG_IPV6=y
+ CONFIG_IPV6_PRIVACY=y
+-CONFIG_IPV6_ROUTER_PREF=y
++CONFIG_IPV6_ROUTER_PREF=n
+ CONFIG_IPV6_ROUTE_INFO=y
+ CONFIG_IPV6_OPTIMISTIC_DAD=y
+ CONFIG_INET6_AH=y
+-- 
+2.7.4
+

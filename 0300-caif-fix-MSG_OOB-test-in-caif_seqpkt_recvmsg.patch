@@ -1,0 +1,40 @@
+From 82504a903bf651f77bf2d10e42df520423560569 Mon Sep 17 00:00:00 2001
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Date: Sat, 14 Mar 2015 05:22:21 +0000
+Subject: [PATCH 0300/1168] caif: fix MSG_OOB test in caif_seqpkt_recvmsg()
+
+[ Upstream commit 3eeff778e00c956875c70b145c52638c313dfb23 ]
+
+It should be checking flags, not msg->msg_flags.  It's ->sendmsg()
+instances that need to look for that in ->msg_flags, ->recvmsg() ones
+(including the other ->recvmsg() instance in that file, as well as
+unix_dgram_recvmsg() this one claims to be imitating) check in flags.
+Braino had been introduced in commit dcda13 ("caif: Bugfix - use MSG_TRUNC
+in receive") back in 2010, so it goes quite a while back.
+
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: e6cbc56e269d3f3e99db503aa69865f3fa08681b
+---
+ net/caif/caif_socket.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/caif/caif_socket.c b/net/caif/caif_socket.c
+index d6be3ed..526bf56 100644
+--- a/net/caif/caif_socket.c
++++ b/net/caif/caif_socket.c
+@@ -283,7 +283,7 @@ static int caif_seqpkt_recvmsg(struct kiocb *iocb, struct socket *sock,
+ 	int copylen;
+ 
+ 	ret = -EOPNOTSUPP;
+-	if (m->msg_flags&MSG_OOB)
++	if (flags & MSG_OOB)
+ 		goto read_error;
+ 
+ 	skb = skb_recv_datagram(sk, flags, 0 , &ret);
+-- 
+2.7.4
+

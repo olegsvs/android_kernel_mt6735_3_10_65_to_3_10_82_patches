@@ -1,0 +1,37 @@
+From 05612ba69300d480055ac20ffebafef1d2ad1d0b Mon Sep 17 00:00:00 2001
+From: Levin Calado <levincalado@gmail.com>
+Date: Sat, 13 Jun 2015 22:08:11 +0800
+Subject: [PATCH 0878/1168] Makefile: use ccache
+
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: aaffd30a68e1f7e9bb82c6abea7cef58b554abab
+---
+ Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index f8b6188..7fa7123 100644
+--- a/Makefile
++++ b/Makefile
+@@ -239,7 +239,7 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
+ 	  else if [ -x /bin/bash ]; then echo /bin/bash; \
+ 	  else echo sh; fi ; fi)
+ 
+-HOSTCC       = gcc
++HOSTCC       = ccache gcc
+ HOSTCXX      = g++
+ HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
+ HOSTCXXFLAGS = -O2
+@@ -326,7 +326,7 @@ include $(srctree)/scripts/Kbuild.include
+ 
+ AS		= $(CROSS_COMPILE)as
+ LD		= $(CROSS_COMPILE)ld
+-CC		= $(CROSS_COMPILE)gcc
++CC		= ccache $(CROSS_COMPILE)gcc
+ CPP		= $(CC) -E
+ AR		= $(CROSS_COMPILE)ar
+ NM		= $(CROSS_COMPILE)nm
+-- 
+2.7.4
+

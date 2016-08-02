@@ -1,0 +1,43 @@
+From 0d3359221aab029855be4c4c7125400803f55bee Mon Sep 17 00:00:00 2001
+From: Guenter Roeck <linux@roeck-us.net>
+Date: Sun, 8 Sep 2013 00:25:36 -0700
+Subject: [PATCH 0765/1168] mfd: sm501: dbg_regs attribute must be read-only
+
+commit 8a8320c2e78d1b619a8fa8eb5ae946b8691de604 upstream.
+
+Fix:
+
+sm501 sm501: SM501 At b3e00000: Version 050100a0, 8 Mb, IRQ 100
+Attribute dbg_regs: write permission without 'store'
+------------[ cut here ]------------
+WARNING: at drivers/base/core.c:620
+
+dbg_regs does not have a write function and must therefore be marked
+as read-only.
+
+Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+Signed-off-by: Lee Jones <lee.jones@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: ebfb3669c00871208e901427dd1cf1344a55c2fc
+---
+ drivers/mfd/sm501.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mfd/sm501.c b/drivers/mfd/sm501.c
+index 9816c23..c04e08d 100755
+--- a/drivers/mfd/sm501.c
++++ b/drivers/mfd/sm501.c
+@@ -1232,7 +1232,7 @@ static ssize_t sm501_dbg_regs(struct device *dev,
+ }
+ 
+ 
+-static DEVICE_ATTR(dbg_regs, 0666, sm501_dbg_regs, NULL);
++static DEVICE_ATTR(dbg_regs, 0444, sm501_dbg_regs, NULL);
+ 
+ /* sm501_init_reg
+  *
+-- 
+2.7.4
+

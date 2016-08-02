@@ -1,0 +1,81 @@
+From 21567e318343f97f8bae9938f2e78659d6517e51 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Tue, 10 May 2016 22:54:02 +0300
+Subject: [PATCH 047/117] JD9367 REVERT + JD9365 WORK!
+
+---
+ .../lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c    | 16 +++++++++++-----
+ .../lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c    |  2 +-
+ include/generated/compile.h                              |  4 ++--
+ 3 files changed, 14 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+index 5308a8c..c015d8f 100644
+--- a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+@@ -155,7 +155,7 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
+ {0xE3,1,{0xF8}},
+ 
+ //--- Sequence Ctrl ----//
+-{0x80,1,{0x02}},
++{0x80,1,{0x01}},
+ 
+ //--- Page1  ----//
+ {0xE0,1,{0x01}},
+@@ -224,12 +224,17 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
+ {0x6E,1,{0x25}},
+ {0x6F,1,{0x0F}},
+ 
+-{0x70,1,{0x78}},
+-{0x71,1,{0x44}},
+-{0x72,1,{0x35}},
++
++{0x70,1,{0x20}},
++{0x71,1,{0x13}},
++{0x72,1,{0x06}},
++{0x75,1,{0x03}},
++
++
++
+ {0x73,1,{0x2A}},
+ {0x74,1,{0x27}},
+-{0x75,1,{0x19}},
++
+ {0x76,1,{0x20}},
+ {0x77,1,{0x0D}},
+ {0x78,1,{0x27}},
+@@ -747,3 +752,4 @@ LCM_DRIVER jd9365_6735_dsi_video_lcm_drv =
+ #endif	//wqtao
+ };
+ 
++
+diff --git a/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c b/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c
+index 7f781b3..62e15c4 100644
+--- a/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c
+@@ -188,7 +188,7 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
+ 	{0x26,1,{0xF1}},	//VDDD from IOVCC
+ 
+ 	//SetPanel
+-	{0x37,1,{0x05}},	//05 REVERSE /SS=0,BGR=1,GS=1
++	{0x37,1,{0x09}},	//05 REVERSE /SS=0,BGR=1,GS=1
+ 
+ 	//SET RGBCYC
+ 	{0x38,1,{0x04}},	//JDT=100 column inversion
+diff --git a/include/generated/compile.h b/include/generated/compile.h
+index 00ca843..fad558d 100644
+--- a/include/generated/compile.h
++++ b/include/generated/compile.h
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 20 */
++/* This file is auto generated, version 21 */
+ /* SMP PREEMPT */
+ #define UTS_MACHINE "arm64"
+-#define UTS_VERSION "#20 SMP PREEMPT Tue May 10 22:46:34 MSK 2016"
++#define UTS_VERSION "#21 SMP PREEMPT Tue May 10 22:48:43 MSK 2016"
+ #define LINUX_COMPILE_BY "olegsvs"
+ #define LINUX_COMPILE_HOST "olegsvs-develop"
+ #define LINUX_COMPILER "gcc version 4.9 20150123 (prerelease) (GCC) "
+-- 
+2.7.4
+

@@ -1,0 +1,34 @@
+From 1cbe9275a8bd1e3bd77ba4787baba41e0d6deacb Mon Sep 17 00:00:00 2001
+From: "Eric W. Biederman" <ebiederm@xmission.com>
+Date: Tue, 11 Mar 2014 14:14:58 -0700
+Subject: [PATCH 0378/1168] 8139cp: Call dev_kfree_skby_any instead of
+ kfree_skb.
+
+Replace kfree_skb with dev_kfree_skb_any in cp_start_xmit
+as it can be called in both hard irq and other contexts.
+
+Signed-off-by: "Eric W. Biederman" <ebiederm@xmission.com>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+Former-commit-id: 868b38ec5c6307281bd944ebde03fc5c44bb3e85
+---
+ drivers/net/ethernet/realtek/8139cp.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/ethernet/realtek/8139cp.c b/drivers/net/ethernet/realtek/8139cp.c
+index 064425d..437d4cf 100755
+--- a/drivers/net/ethernet/realtek/8139cp.c
++++ b/drivers/net/ethernet/realtek/8139cp.c
+@@ -899,7 +899,7 @@ out_unlock:
+ 
+ 	return NETDEV_TX_OK;
+ out_dma_error:
+-	kfree_skb(skb);
++	dev_kfree_skb_any(skb);
+ 	cp->dev->stats.tx_dropped++;
+ 	goto out_unlock;
+ }
+-- 
+2.7.4
+

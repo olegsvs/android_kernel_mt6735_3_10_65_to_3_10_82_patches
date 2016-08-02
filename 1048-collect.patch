@@ -1,0 +1,116 @@
+From 462c35f2489baa2d78e26bdbdaf6f31939c8d324 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Wed, 4 May 2016 19:28:01 +0300
+Subject: [PATCH 1048/1168] collect
+
+---
+ .../rm68200_6735_dsi_video.c                       | 77 ++++++++--------------
+ include/generated/compile.h                        |  4 +-
+ 2 files changed, 29 insertions(+), 52 deletions(-)
+
+diff --git a/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c b/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c
+index 31f6b82..d1b0c1e 100644
+--- a/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/rm68200_6735_dsi_video/rm68200_6735_dsi_video.c
+@@ -525,57 +525,34 @@ static void lcm_get_params(LCM_PARAMS * params)
+ {
+ 	memset(params, 0, sizeof(LCM_PARAMS));
+ 
+-	params->type = LCM_TYPE_DSI;
++  params->dsi.data_format.color_order = 0;
++  params->dsi.data_format.trans_seq = 0;
++  params->dsi.data_format.padding = 0;
++  params->dsi.intermediat_buffer_num = 0;
++  params->dsi.packet_size = 256;
++  params->dsi.word_count = 2160;
++  params->dsi.PLL_CLOCK = 208;
++  params->dsi.lcm_esd_check_table[0].para_list[0] = -100;
++  params->type = 2;
++  params->dsi.data_format.format = 2;
++  params->dsi.PS = 2;
++  params->width = 720;
++  params->dsi.horizontal_active_pixel = 720;
++  params->height = 1280;
++  params->dsi.vertical_active_line = 1280;
++  params->dsi.mode = 1;
++  params->dsi.esd_check_enable = 1;
++  params->dsi.customization_esd_check_enable = 1;
++  params->dsi.lcm_esd_check_table[0].count = 1;
++  params->dsi.LANE_NUM = 4;
++  params->dsi.vertical_sync_active = 4;
++  params->dsi.vertical_backporch = 16;
++  params->dsi.vertical_frontporch = 16;
++  params->dsi.horizontal_sync_active = 10;
++  params->dsi.lcm_esd_check_table[0].cmd = 10;
++  params->dsi.horizontal_backporch = 50;
++  params->dsi.horizontal_frontporch = 50;
+ 
+-	params->width = FRAME_WIDTH;
+-	params->height = FRAME_HEIGHT;
+-
+-	// enable tearing-free
+-	params->dbi.te_mode = LCM_DBI_TE_MODE_DISABLED;
+-	params->dbi.te_edge_polarity = LCM_POLARITY_RISING;
+-
+-#if (LCM_DSI_CMD_MODE)
+-	params->dsi.mode = CMD_MODE;
+-#else
+-	params->dsi.mode   = SYNC_PULSE_VDO_MODE;//SYNC_EVENT_VDO_MODE;//BURST_VDO_MODE;////
+-#endif
+-
+-	// DSI
+-	/* Command mode setting */
+-		params->dsi.LANE_NUM				= LCM_THREE_LANE;
+-	
+-	//The following defined the fomat for data coming from LCD engine.
+-	params->dsi.data_format.color_order = LCM_COLOR_ORDER_RGB;
+-	params->dsi.data_format.trans_seq   = LCM_DSI_TRANS_SEQ_MSB_FIRST;
+-	params->dsi.data_format.padding     = LCM_DSI_PADDING_ON_LSB;
+-	params->dsi.data_format.format      = LCM_DSI_FORMAT_RGB888;
+-	
+-	
+-	params->dsi.PS=LCM_PACKED_PS_24BIT_RGB888;
+-	
+-#if (LCM_DSI_CMD_MODE)
+-	params->dsi.intermediat_buffer_num = 0;//because DSI/DPI HW design change, this parameters should be 0 when video mode in MT658X; or memory leakage
+-	params->dsi.word_count=FRAME_WIDTH*3;	//DSI CMD mode need set these two bellow params, different to 6577
+-#else
+-	params->dsi.intermediat_buffer_num = 0;	//because DSI/DPI HW design change, this parameters should be 0 when video mode in MT658X; or memory leakage
+-#endif
+-
+-	// Video mode setting
+-	params->dsi.packet_size=256;
+-
+-	params->dsi.vertical_sync_active				=  2;//4
+-	params->dsi.vertical_backporch					= 14;//50;
+-	params->dsi.vertical_frontporch					= 16;//50;
+-	params->dsi.vertical_active_line				= FRAME_HEIGHT; 
+-
+-	params->dsi.horizontal_sync_active				= 4;//10
+-	params->dsi.horizontal_backporch				= 16;//34; 
+-	params->dsi.horizontal_frontporch				= 8;//24;
+-	params->dsi.horizontal_active_pixel				= FRAME_WIDTH;
+-
+-	// Bit rate calculation
+-	//1 Every lane speed
+-params->dsi.PLL_CLOCK=250;
+ }
+ 
+ static void lcm_init(void)
+diff --git a/include/generated/compile.h b/include/generated/compile.h
+index be0285e..d87b5bf 100644
+--- a/include/generated/compile.h
++++ b/include/generated/compile.h
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 10 */
++/* This file is auto generated, version 12 */
+ /* SMP PREEMPT */
+ #define UTS_MACHINE "arm64"
+-#define UTS_VERSION "#10 SMP PREEMPT Tue May 3 23:53:56 MSK 2016"
++#define UTS_VERSION "#12 SMP PREEMPT Wed May 4 00:23:22 MSK 2016"
+ #define LINUX_COMPILE_BY "olegsvs"
+ #define LINUX_COMPILE_HOST "olegsvs-develop"
+ #define LINUX_COMPILER "gcc version 4.9 20150123 (prerelease) (GCC) "
+-- 
+2.7.4
+

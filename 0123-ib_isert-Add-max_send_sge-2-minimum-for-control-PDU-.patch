@@ -1,0 +1,52 @@
+From c4a99120187e7d027b873a9261f33a19a0857731 Mon Sep 17 00:00:00 2001
+From: Or Gerlitz <ogerlitz@mellanox.com>
+Date: Fri, 30 Jan 2015 22:17:21 +0000
+Subject: [PATCH 0123/1168] ib_isert: Add max_send_sge=2 minimum for control
+ PDU responses
+
+commit f57915cfa5b2b14c1cffa2e83c034f55e3f0e70d upstream.
+
+This patch adds a max_send_sge=2 minimum in isert_conn_setup_qp()
+to ensure outgoing control PDU responses with tx_desc->num_sge=2
+are able to function correctly.
+
+This addresses a bug with RDMA hardware using dev_attr.max_sge=3,
+that in the original code with the ConnectX-2 work-around would
+result in isert_conn->max_sge=1 being negotiated.
+
+Originally reported by Chris with ocrdma driver.
+
+Reported-by: Chris Moore <Chris.Moore@emulex.com>
+Tested-by: Chris Moore <Chris.Moore@emulex.com>
+Signed-off-by: Or Gerlitz <ogerlitz@mellanox.com>
+Signed-off-by: Nicholas Bellinger <nab@linux-iscsi.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 7bd6fe53e24bac984f52678d5647370afbd65151
+---
+ drivers/infiniband/ulp/isert/ib_isert.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/infiniband/ulp/isert/ib_isert.c b/drivers/infiniband/ulp/isert/ib_isert.c
+index 42f5edd..0812e98 100755
+--- a/drivers/infiniband/ulp/isert/ib_isert.c
++++ b/drivers/infiniband/ulp/isert/ib_isert.c
+@@ -107,9 +107,12 @@ isert_conn_setup_qp(struct isert_conn *isert_conn, struct rdma_cm_id *cma_id)
+ 	attr.cap.max_recv_wr = ISERT_QP_MAX_RECV_DTOS;
+ 	/*
+ 	 * FIXME: Use devattr.max_sge - 2 for max_send_sge as
+-	 * work-around for RDMA_READ..
++	 * work-around for RDMA_READs with ConnectX-2.
++	 *
++	 * Also, still make sure to have at least two SGEs for
++	 * outgoing control PDU responses.
+ 	 */
+-	attr.cap.max_send_sge = devattr.max_sge - 2;
++	attr.cap.max_send_sge = max(2, devattr.max_sge - 2);
+ 	isert_conn->max_sge = attr.cap.max_send_sge;
+ 
+ 	attr.cap.max_recv_sge = 1;
+-- 
+2.7.4
+

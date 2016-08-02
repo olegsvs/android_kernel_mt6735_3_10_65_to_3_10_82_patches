@@ -1,0 +1,58 @@
+From 1872aaabbee7ffa30164da057a2a360cc1e9cbaa Mon Sep 17 00:00:00 2001
+From: Stefan Guendhoer <stefan@guendhoer.com>
+Date: Thu, 7 Jan 2016 22:23:23 +0000
+Subject: [PATCH 0908/1168] fdgdfg
+
+Former-commit-id: 068603b208f7212ee7c3d160d9f31ced152a4a0c
+---
+ kernel/power/Kconfig   | 4 ++++
+ kernel/power/suspend.c | 6 ++++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/kernel/power/Kconfig b/kernel/power/Kconfig
+index 387e185..ed7163c 100644
+--- a/kernel/power/Kconfig
++++ b/kernel/power/Kconfig
+@@ -606,10 +606,14 @@ config SUSPEND_TIME
+ 	  /sys/kernel/debug/suspend_time
+ 
+ <<<<<<< HEAD
++<<<<<<< HEAD
+  config PM_SYNC_BEFORE_SUSPEND
+ =======
+ config PM_SYNC_BEFORE_SUSPEND
+ >>>>>>> 7e69c4e... power: make sync on suspend optional
++=======
++config PM_SYNC_BEFORE_SUSPEND
++>>>>>>> 7e69c4e... power: make sync on suspend optional
+ 	bool "Sync file systems before suspend"
+ 	depends on PM
+ 	default y
+diff --git a/kernel/power/suspend.c b/kernel/power/suspend.c
+index 7781be6..e94c9b1 100644
+--- a/kernel/power/suspend.c
++++ b/kernel/power/suspend.c
+@@ -403,6 +403,9 @@ int enter_state(suspend_state_t state)
+ <<<<<<< HEAD
+ =======
+ 
++<<<<<<< HEAD
++>>>>>>> 7e69c4e... power: make sync on suspend optional
++=======
+ >>>>>>> 7e69c4e... power: make sync on suspend optional
+ #ifdef CONFIG_PM_SYNC_BEFORE_SUSPEND
+ 	printk(KERN_INFO "PM: Syncing filesystems ... ");
+@@ -418,7 +421,10 @@ int enter_state(suspend_state_t state)
+ 	printk("done.\n");
+ #endif
+ <<<<<<< HEAD
++<<<<<<< HEAD
++=======
+ =======
++>>>>>>> 7e69c4e... power: make sync on suspend optional
+ 
+ >>>>>>> 7e69c4e... power: make sync on suspend optional
+ 	pr_debug("PM: Preparing system for %s sleep\n", pm_states[state].label);
+-- 
+2.7.4
+

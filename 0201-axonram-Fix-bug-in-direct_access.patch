@@ -1,0 +1,38 @@
+From 0ff320a48d2ea2049cc5e8ef1d39a08fc45f48de Mon Sep 17 00:00:00 2001
+From: Matthew Wilcox <matthew.r.wilcox@intel.com>
+Date: Wed, 7 Jan 2015 18:04:18 +0200
+Subject: [PATCH 0201/1168] axonram: Fix bug in direct_access
+
+commit 91117a20245b59f70b563523edbf998a62fc6383 upstream.
+
+The 'pfn' returned by axonram was completely bogus, and has been since
+2008.
+
+Signed-off-by: Matthew Wilcox <matthew.r.wilcox@intel.com>
+Reviewed-by: Jan Kara <jack@suse.cz>
+Reviewed-by: Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
+Signed-off-by: Jens Axboe <axboe@fb.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: ed61652ee37345e34d72eda3e930677cdc3d6221
+---
+ arch/powerpc/sysdev/axonram.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/powerpc/sysdev/axonram.c b/arch/powerpc/sysdev/axonram.c
+index 1c16141..1fea249 100644
+--- a/arch/powerpc/sysdev/axonram.c
++++ b/arch/powerpc/sysdev/axonram.c
+@@ -155,7 +155,7 @@ axon_ram_direct_access(struct block_device *device, sector_t sector,
+ 	}
+ 
+ 	*kaddr = (void *)(bank->ph_addr + offset);
+-	*pfn = virt_to_phys(kaddr) >> PAGE_SHIFT;
++	*pfn = virt_to_phys(*kaddr) >> PAGE_SHIFT;
+ 
+ 	return 0;
+ }
+-- 
+2.7.4
+

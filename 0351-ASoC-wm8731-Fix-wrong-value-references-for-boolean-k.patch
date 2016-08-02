@@ -1,0 +1,49 @@
+From 11af3e01d0ab9788dad84cc9f9e65922ab699e67 Mon Sep 17 00:00:00 2001
+From: Takashi Iwai <tiwai@suse.de>
+Date: Tue, 10 Mar 2015 12:39:10 +0100
+Subject: [PATCH 0351/1168] ASoC: wm8731: Fix wrong value references for
+ boolean kctl
+
+commit bd14016fbf31aa199026f1e2358eab695f374eb1 upstream.
+
+The correct values referred by a boolean control are
+value.integer.value[], not value.enumerated.item[].
+The former is long while the latter is int, so it's even incompatible
+on 64bit architectures.
+
+Signed-off-by: Takashi Iwai <tiwai@suse.de>
+Acked-by: Charles Keepax <ckeepax@opensource.wolfsonmicro.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 5c3aa281653a3870547de672dd63d8e16b0e50e4
+---
+ sound/soc/codecs/wm8731.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/sound/soc/codecs/wm8731.c b/sound/soc/codecs/wm8731.c
+index 10d492b..944b09b 100644
+--- a/sound/soc/codecs/wm8731.c
++++ b/sound/soc/codecs/wm8731.c
+@@ -121,7 +121,7 @@ static int wm8731_get_deemph(struct snd_kcontrol *kcontrol,
+ 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+ 	struct wm8731_priv *wm8731 = snd_soc_codec_get_drvdata(codec);
+ 
+-	ucontrol->value.enumerated.item[0] = wm8731->deemph;
++	ucontrol->value.integer.value[0] = wm8731->deemph;
+ 
+ 	return 0;
+ }
+@@ -131,7 +131,7 @@ static int wm8731_put_deemph(struct snd_kcontrol *kcontrol,
+ {
+ 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+ 	struct wm8731_priv *wm8731 = snd_soc_codec_get_drvdata(codec);
+-	int deemph = ucontrol->value.enumerated.item[0];
++	int deemph = ucontrol->value.integer.value[0];
+ 	int ret = 0;
+ 
+ 	if (deemph > 1)
+-- 
+2.7.4
+

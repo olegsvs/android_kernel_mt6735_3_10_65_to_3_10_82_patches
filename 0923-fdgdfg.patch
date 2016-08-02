@@ -1,0 +1,28 @@
+From f09da120494db9f4badcf6e6cc7cd8f538b89e69 Mon Sep 17 00:00:00 2001
+From: Jan Magnus Brevik <jmbrevik@getmail.no>
+Date: Tue, 3 Nov 2015 07:59:14 +0100
+Subject: [PATCH 0923/1168] fdgdfg
+
+Former-commit-id: aa3f5c19d7a0592abb82f6c376c5c97829d16287
+---
+ drivers/misc/mediatek/Makefile | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/misc/mediatek/Makefile b/drivers/misc/mediatek/Makefile
+index 9b99a0f..b50b92d 100755
+--- a/drivers/misc/mediatek/Makefile
++++ b/drivers/misc/mediatek/Makefile
+@@ -258,7 +258,10 @@ obj-y	+= selinux_warning/
+ # MTK PASR SW flow
+ obj-$(CONFIG_MTKPASR)	+= mtkpasr/
+ 
++<<<<<<< HEAD
+ 
++=======
++>>>>>>> ad43ce2... make it possible to mrproper
+ obj-$(CONFIG_MTK_SWITCH_TX_POWER) += sw_tx_power/
+ 
+ #charge pump
+-- 
+2.7.4
+

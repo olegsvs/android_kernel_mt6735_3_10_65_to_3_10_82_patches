@@ -1,0 +1,38 @@
+From 6e0d58707b3a8b722189aca64493517b9e36a3e9 Mon Sep 17 00:00:00 2001
+From: Subbaraya Sundeep Bhatta <subbaraya.sundeep.bhatta@xilinx.com>
+Date: Thu, 21 May 2015 15:46:47 +0530
+Subject: [PATCH 0677/1168] usb: dwc3: gadget: return error if command sent to
+ DGCMD register fails
+
+commit 891b1dc022955d36cf4c0f42d383226a930db7ed upstream.
+
+We need to return error to caller if command is not sent to
+controller succesfully.
+
+Signed-off-by: Subbaraya Sundeep Bhatta <sbhatta@xilinx.com>
+Fixes: b09bb64239c8 (usb: dwc3: gadget: implement Global Command support)
+Signed-off-by: Felipe Balbi <balbi@ti.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: bca7ef99a6e6b2da49e41906d48b31cc0421d84c
+---
+ drivers/usb/dwc3/gadget.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/usb/dwc3/gadget.c b/drivers/usb/dwc3/gadget.c
+index 87f8fc6..be6fa45 100755
+--- a/drivers/usb/dwc3/gadget.c
++++ b/drivers/usb/dwc3/gadget.c
+@@ -319,6 +319,8 @@ int dwc3_send_gadget_generic_command(struct dwc3 *dwc, int cmd, u32 param)
+ 		if (!(reg & DWC3_DGCMD_CMDACT)) {
+ 			dev_vdbg(dwc->dev, "Command Complete --> %d\n",
+ 					DWC3_DGCMD_STATUS(reg));
++			if (DWC3_DGCMD_STATUS(reg))
++				return -EINVAL;
+ 			return 0;
+ 		}
+ 
+-- 
+2.7.4
+

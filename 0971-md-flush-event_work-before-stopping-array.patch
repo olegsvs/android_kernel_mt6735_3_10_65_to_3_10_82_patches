@@ -1,0 +1,40 @@
+From 5eb96d9ac25d71aec991974d9f368f7bd950f691 Mon Sep 17 00:00:00 2001
+From: NeilBrown <neilb@suse.com>
+Date: Wed, 22 Jul 2015 10:20:07 +1000
+Subject: [PATCH 0971/1168] md: flush ->event_work before stopping array.
+
+commit ee5d004fd0591536a061451eba2b187092e9127c upstream.
+
+The 'event_work' worker used by dm-raid may still be running
+when the array is stopped.  This can result in an oops.
+
+So flush the workqueue on which it is run after detaching
+and before destroying the device.
+
+Reported-by: Heinz Mauelshagen <heinzm@redhat.com>
+Signed-off-by: NeilBrown <neilb@suse.com>
+Fixes: 9d09e663d550 ("dm: raid456 basic support")
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: f3b6a4f5a0e4e8b7d20a962d9e1c0695b29283ae
+---
+ drivers/md/md.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/md/md.c b/drivers/md/md.c
+index ed0c6a6..f1d24fd 100755
+--- a/drivers/md/md.c
++++ b/drivers/md/md.c
+@@ -5307,6 +5307,8 @@ EXPORT_SYMBOL_GPL(md_stop_writes);
+ static void __md_stop(struct mddev *mddev)
+ {
+ 	mddev->ready = 0;
++	/* Ensure ->event_work is done */
++	flush_workqueue(md_misc_wq);
+ 	mddev->pers->stop(mddev);
+ 	if (mddev->pers->sync_request && mddev->to_remove == NULL)
+ 		mddev->to_remove = &md_redundancy_group;
+-- 
+2.7.4
+

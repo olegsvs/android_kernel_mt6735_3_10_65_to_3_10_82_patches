@@ -1,0 +1,40 @@
+From 9f96a3a3486cf59995cad7a5f176defc2f450af1 Mon Sep 17 00:00:00 2001
+From: Stefan Guendhoer <stefan@guendhoer.com>
+Date: Sat, 9 Jan 2016 04:54:56 +0000
+Subject: [PATCH 0932/1168] small revert
+
+Former-commit-id: 0828017ab669661e3a5699746346b51d624d56be
+---
+ drivers/cpufreq/cpufreq_intelliactive.c | 2 +-
+ drivers/cpufreq/cpufreq_smartmax.c      | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/cpufreq/cpufreq_intelliactive.c b/drivers/cpufreq/cpufreq_intelliactive.c
+index 02c69b3..1ba53f6 100644
+--- a/drivers/cpufreq/cpufreq_intelliactive.c
++++ b/drivers/cpufreq/cpufreq_intelliactive.c
+@@ -1267,7 +1267,7 @@ static void interactive_input_event(struct input_handle *handle,
+ 	}
+ }
+ 
+-static int input_dev_filter(const char *input_dev_name) {
++static int input_dev_filter(const char* input_dev_name) {
+ 	int ret = 0;
+ 	if (strstr(input_dev_name, "touchscreen")
+ 			/* Add all touch panel drivers for touch boost */
+diff --git a/drivers/cpufreq/cpufreq_smartmax.c b/drivers/cpufreq/cpufreq_smartmax.c
+index 8ffebba..76ddce4 100644
+--- a/drivers/cpufreq/cpufreq_smartmax.c
++++ b/drivers/cpufreq/cpufreq_smartmax.c
+@@ -1059,7 +1059,7 @@ static void dbs_input_event(struct input_handle *handle, unsigned int type,
+ 	}
+ }
+ 
+-static int input_dev_filter(const char *input_dev_name) {
++static int input_dev_filter(const char* input_dev_name) {
+ 	int ret = 0;
+ 	if (strstr(input_dev_name, "touchscreen")
+ <<<<<<< HEAD
+-- 
+2.7.4
+

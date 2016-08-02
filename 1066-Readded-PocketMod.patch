@@ -1,0 +1,136 @@
+From 95c49a3ae7f163bd8bced505bb784851ac4f343e Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Sun, 8 May 2016 22:42:06 +0300
+Subject: [PATCH 1066/1168] Readded PocketMod
+
+---
+ drivers/misc/Kconfig                               | 10 +++++++
+ drivers/misc/Makefile                              |  2 ++
+ .../misc/mediatek/alsps/stk3x1x_driver/stk3x1x.c   | 34 +++++++++++++++++++++-
+ .../jd9367_6735_dsi_video/jd9367_6735_dsi_video.c  | 11 ++++++-
+ 4 files changed, 55 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/misc/Kconfig b/drivers/misc/Kconfig
+index 9a31536..120765c 100644
+--- a/drivers/misc/Kconfig
++++ b/drivers/misc/Kconfig
+@@ -67,6 +67,16 @@ config ATMEL_PWM
+ 	  purposes including software controlled power-efficient backlights
+ 	  on LCD displays, motor control, and waveform generation.
+ 
++	  
++config POCKETMOD
++	bool "PocketMod for device wake modifications"
++	default y
++	help
++		Say Y here to enable PocketMod. Users can always
++		toggle this on/off from sysfs later (should they
++		want it)  
++
++
+ config THUNDERQUAKE_ENGINE_GPL
+    tristate "Vibrator Intensity Controller for MTK Vibrator"
+    default y
+diff --git a/drivers/misc/Makefile b/drivers/misc/Makefile
+index 11bae8e..ed43507 100755
+--- a/drivers/misc/Makefile
++++ b/drivers/misc/Makefile
+@@ -2,6 +2,8 @@
+ # Makefile for misc devices that really don't fit anywhere else.
+ #
+ 
++
++obj-$(CONFIG_POCKETMOD)		+= pocket_mod.o
+ obj-$(CONFIG_ANDROID_PMEM)      += pmem.o
+ obj-$(CONFIG_IBM_ASM)		+= ibmasm/
+ obj-$(CONFIG_AD525X_DPOT)	+= ad525x_dpot.o
+diff --git a/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.c b/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.c
+index cfd349b..a864f23 100644
+--- a/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.c
++++ b/drivers/misc/mediatek/alsps/stk3x1x_driver/stk3x1x.c
+@@ -82,7 +82,9 @@
+ //#define STK_IRS
+ //#define STK_CHK_REG
+ //#define STK_GES
+-
++#ifdef CONFIG_POCKETMOD
++#include <linux/pocket_mod.h>
++#endif
+ /////
+ extern struct alsps_hw* stk_get_cust_alsps_hw(void);
+ 
+@@ -2697,6 +2699,36 @@ static ssize_t stk3x1x_show_config(struct device_driver *ddri, char *buf)
+ 	return res;    
+ }
+ /*----------------------------------------------------------------------------*/
++#ifdef CONFIG_POCKETMOD
++int stk3x1x_pocket_detection_check(void)
++{
++	int ps_val;
++	int als_val;
++
++	struct  stk3x1x_priv *obj = stk3x1x_obj;
++	
++	if(obj == NULL)
++	{
++		APS_DBG("[stk3x1x] stk3x1x_obj is NULL!");
++		return 0;
++	}
++	else
++	{
++		stk3x1x_enable_ps(obj->client, 1);
++
++		msleep(50);
++
++		ps_val = stk3x1x_get_ps_value(obj, obj->ps);
++		als_val = stk3x1x_get_als_value(obj, obj->ps);
++
++		APS_DBG("[stk3x1x] %s als_val = %d, ps_val = %d\n", __func__, als_val, ps_val);
++
++		stk3x1x_enable_ps(obj->client, 0);
++
++		return (ps_val);
++	}
++}
++#endif
+ static ssize_t stk3x1x_store_config(struct device_driver *ddri, const char *buf, size_t count)
+ {
+ 	int retry, als_deb, ps_deb, mask, hthres, lthres, err;
+diff --git a/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c b/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c
+index 920e5fa..62e15c4 100644
+--- a/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/jd9367_6735_dsi_video/jd9367_6735_dsi_video.c
+@@ -76,6 +76,10 @@
+ #include <mach/mt_pm_ldo.h>
+ #endif
+ 
++#ifdef CONFIG_POCKETMOD
++#include <linux/pocket_mod.h>
++#endif
++
+ #if !defined(BUILD_LK)
+ #include <linux/string.h>
+ #endif
+@@ -599,13 +603,18 @@ static void lcm_suspend(void)
+     MDELAY(200);
+ //needed for pocket mode
+ 
++	#ifdef CONFIG_POCKETMOD
++	is_screen_on = 0;
++	#endif 
+ }
+ 
+ 
+ static void lcm_resume(void)
+ {
+   lcm_init();
+-
++#ifdef CONFIG_POCKETMOD
++	is_screen_on = 1;
++	#endif
+ }
+          
+ #if (LCM_DSI_CMD_MODE)
+-- 
+2.7.4
+

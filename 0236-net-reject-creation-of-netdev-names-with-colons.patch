@@ -1,0 +1,37 @@
+From 5d08ad60353513110c798c01589140aaefd5f2e5 Mon Sep 17 00:00:00 2001
+From: Matthew Thode <mthode@mthode.org>
+Date: Tue, 17 Feb 2015 18:31:57 -0600
+Subject: [PATCH 0236/1168] net: reject creation of netdev names with colons
+
+[ Upstream commit a4176a9391868bfa87705bcd2e3b49e9b9dd2996 ]
+
+colons are used as a separator in netdev device lookup in dev_ioctl.c
+
+Specific functions are SIOCGIFTXQLEN SIOCETHTOOL SIOCSIFNAME
+
+Signed-off-by: Matthew Thode <mthode@mthode.org>
+Signed-off-by: David S. Miller <davem@davemloft.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: eaf5deaa07e297cdcfd1e42c6bbae70c70b16b50
+---
+ net/core/dev.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/core/dev.c b/net/core/dev.c
+index e527440..348e3c0 100644
+--- a/net/core/dev.c
++++ b/net/core/dev.c
+@@ -931,7 +931,7 @@ bool dev_valid_name(const char *name)
+ 		return false;
+ 
+ 	while (*name) {
+-		if (*name == '/' || isspace(*name))
++		if (*name == '/' || *name == ':' || isspace(*name))
+ 			return false;
+ 		name++;
+ 	}
+-- 
+2.7.4
+

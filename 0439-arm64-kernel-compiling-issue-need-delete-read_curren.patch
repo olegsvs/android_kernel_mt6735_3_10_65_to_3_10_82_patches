@@ -1,0 +1,73 @@
+From fa7f2cb0b9b6a7adc21be231f745d504a14596be Mon Sep 17 00:00:00 2001
+From: Chen Gang <gang.chen@asianux.com>
+Date: Tue, 21 May 2013 10:46:05 +0100
+Subject: [PATCH 0439/1168] arm64: kernel: compiling issue, need delete
+ read_current_timer()
+
+commit 6916b14ea140ff5c915895eefe9431888a39a84d upstream.
+
+Under arm64, we will calibrate the delay loop statically using a known
+timer frequency, so delete read_current_timer(), or it will cause
+compiling issue with allmodconfig.
+
+The related error:
+  ERROR: "read_current_timer" [lib/rbtree_test.ko] undefined!
+  ERROR: "read_current_timer" [lib/interval_tree_test.ko] undefined!
+  ERROR: "read_current_timer" [fs/ext4/ext4.ko] undefined!
+  ERROR: "read_current_timer" [crypto/tcrypt.ko] undefined!
+
+Signed-off-by: Chen Gang <gang.chen@asianux.com>
+Acked-by: Marc Zyngier <marc.zyngier@arm.com>
+Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Guenter Roeck <linux@roeck-us.net>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 3fef50b13911d2c9e3f5cc37333079defa321b4d
+---
+ arch/arm64/include/asm/timex.h | 6 +++---
+ arch/arm64/kernel/time.c       | 6 ------
+ 2 files changed, 3 insertions(+), 9 deletions(-)
+
+diff --git a/arch/arm64/include/asm/timex.h b/arch/arm64/include/asm/timex.h
+index b24a31a..81a076e 100644
+--- a/arch/arm64/include/asm/timex.h
++++ b/arch/arm64/include/asm/timex.h
+@@ -16,14 +16,14 @@
+ #ifndef __ASM_TIMEX_H
+ #define __ASM_TIMEX_H
+ 
++#include <asm/arch_timer.h>
++
+ /*
+  * Use the current timer as a cycle counter since this is what we use for
+  * the delay loop.
+  */
+-#define get_cycles()	({ cycles_t c; read_current_timer(&c); c; })
++#define get_cycles()	arch_counter_get_cntvct()
+ 
+ #include <asm-generic/timex.h>
+ 
+-#define ARCH_HAS_READ_CURRENT_TIMER
+-
+ #endif
+diff --git a/arch/arm64/kernel/time.c b/arch/arm64/kernel/time.c
+index 3a369aa..29c39d5 100644
+--- a/arch/arm64/kernel/time.c
++++ b/arch/arm64/kernel/time.c
+@@ -61,12 +61,6 @@ unsigned long profile_pc(struct pt_regs *regs)
+ EXPORT_SYMBOL(profile_pc);
+ #endif
+ 
+-int read_current_timer(unsigned long *timer_value)
+-{
+-	*timer_value = arch_timer_read_counter();
+-	return 0;
+-}
+-
+ void __init time_init(void)
+ {
+ 	u32 arch_timer_rate;
+-- 
+2.7.4
+

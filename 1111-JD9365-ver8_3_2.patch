@@ -1,0 +1,54 @@
+From 1fa40abbbc69cbec4166f795bb96accf0745abb7 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Wed, 11 May 2016 22:45:56 +0300
+Subject: [PATCH 1111/1168] JD9365 ver8_3_2
+
+---
+ .../misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c   | 2 +-
+ include/generated/compile.h                                           | 4 ++--
+ ...\320\276\320\262\321\213\320\271 \321\204\320\260\320\271\320\273" | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+index c4efb6d..d0f7ee1 100644
+--- a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+@@ -180,7 +180,7 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
+ 
+ 
+ //SET RGBCYC
+-{0x37,1,{0x02}},	//SS=1,1,{ BGR=1 0.2
++{0x37,1,{0x03}},	//SS=1,1,{ BGR=1 0.3
+ {0x38,1,{0x04}},	//JDT=100 column inversion //color? 
+ {0x3D,1,{0xFF}},
+ {0x3E,1,{0xFF}},
+diff --git a/include/generated/compile.h b/include/generated/compile.h
+index 468882c..7a11dc8 100644
+--- a/include/generated/compile.h
++++ b/include/generated/compile.h
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 40 */
++/* This file is auto generated, version 41 */
+ /* SMP PREEMPT */
+ #define UTS_MACHINE "arm64"
+-#define UTS_VERSION "#40 SMP PREEMPT Wed May 11 02:12:24 MSK 2016"
++#define UTS_VERSION "#41 SMP PREEMPT Wed May 11 22:44:31 MSK 2016"
+ #define LINUX_COMPILE_BY "olegsvs"
+ #define LINUX_COMPILE_HOST "olegsvs-develop"
+ #define LINUX_COMPILER "gcc version 4.9 20150123 (prerelease) (GCC) "
+diff --git "a/\320\275\320\276\320\262\321\213\320\271 \321\204\320\260\320\271\320\273" "b/\320\275\320\276\320\262\321\213\320\271 \321\204\320\260\320\271\320\273"
+index 99cd48e..61fd873 100644
+--- "a/\320\275\320\276\320\262\321\213\320\271 \321\204\320\260\320\271\320\273"	
++++ "b/\320\275\320\276\320\262\321\213\320\271 \321\204\320\260\320\271\320\273"	
+@@ -10,7 +10,7 @@ export PATH=/home/olegsvs/5/aarch64-linux-gnu-5.3/bin:$PATH
+ 
+ export CROSS_COMPILE=/home/olegsvs/Android/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+ export ARCH=arm64 export ARCH_MTK_PLATFORM=mt6735m 
+-make benefit_m7_defconfig_B
++make benefit_m7_A_defconfig
+ make -j5
+ 
+ export CROSS_COMPILE=/home/olegsvs/Android/aarch64-linux-android-4.9/bin/aarch64-linux-android-
+-- 
+2.7.4
+

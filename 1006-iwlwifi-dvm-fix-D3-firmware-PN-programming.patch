@@ -1,0 +1,39 @@
+From aeba950900e2423e3037c340635c0515448b6d38 Mon Sep 17 00:00:00 2001
+From: Johannes Berg <johannes.berg@intel.com>
+Date: Tue, 15 Sep 2015 14:36:09 +0200
+Subject: [PATCH 1006/1168] iwlwifi: dvm: fix D3 firmware PN programming
+
+commit 5bd166872d8f99f156fac191299d24f828bb2348 upstream.
+
+The code to send the RX PN data (for each TID) to the firmware
+has a devastating bug: it overwrites the data for TID 0 with
+all the TID data, leaving the remaining TIDs zeroed. This will
+allow replays to actually be accepted by the firmware, which
+could allow waking up the system.
+
+Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+Signed-off-by: Luca Coelho <luciano.coelho@intel.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 76a1ef9c7a9b7d0cc698c67a514b0973b26a5102
+---
+ drivers/net/wireless/iwlwifi/dvm/lib.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/wireless/iwlwifi/dvm/lib.c b/drivers/net/wireless/iwlwifi/dvm/lib.c
+index 54f5533..54308df 100755
+--- a/drivers/net/wireless/iwlwifi/dvm/lib.c
++++ b/drivers/net/wireless/iwlwifi/dvm/lib.c
+@@ -1023,7 +1023,7 @@ static void iwlagn_wowlan_program_keys(struct ieee80211_hw *hw,
+ 			u8 *pn = seq.ccmp.pn;
+ 
+ 			ieee80211_get_key_rx_seq(key, i, &seq);
+-			aes_sc->pn = cpu_to_le64(
++			aes_sc[i].pn = cpu_to_le64(
+ 					(u64)pn[5] |
+ 					((u64)pn[4] << 8) |
+ 					((u64)pn[3] << 16) |
+-- 
+2.7.4
+

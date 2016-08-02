@@ -1,0 +1,43 @@
+From 8fc2c353a5b8987aa0f9b7a674dbb3d2166d7ea1 Mon Sep 17 00:00:00 2001
+From: Christophe Ricard <christophe.ricard@gmail.com>
+Date: Mon, 1 Dec 2014 19:32:46 +0100
+Subject: [PATCH 0195/1168] tpm/tpm_i2c_stm_st33: Fix potential bug in
+ tpm_stm_i2c_send
+
+commit 1ba3b0b6f218072afe8372d12f1b6bf26a26008e upstream.
+
+When sending data in tpm_stm_i2c_send, each loop iteration send buf.
+Send buf + i instead as the goal of this for loop is to send a number
+of byte from buf that fit in burstcnt. Once those byte are sent, we are
+supposed to send the next ones.
+
+The driver was working because the burstcount value returns always the maximum size for a TPM
+command or response. (0x800 for a command and 0x400 for a response).
+
+Reviewed-by: Jason Gunthorpe <jgunthorpe@obsidianresearch.com>
+Signed-off-by: Christophe Ricard <christophe-h.ricard@st.com>
+Signed-off-by: Peter Huewe <peterhuewe@gmx.de>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 64dc60c5260f8c2f25b4984a342ad73ceb162827
+---
+ drivers/char/tpm/tpm_i2c_stm_st33.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/char/tpm/tpm_i2c_stm_st33.c b/drivers/char/tpm/tpm_i2c_stm_st33.c
+index 156bd3c..3925f7b 100755
+--- a/drivers/char/tpm/tpm_i2c_stm_st33.c
++++ b/drivers/char/tpm/tpm_i2c_stm_st33.c
+@@ -488,7 +488,7 @@ static int tpm_stm_i2c_send(struct tpm_chip *chip, unsigned char *buf,
+ 		if (burstcnt < 0)
+ 			return burstcnt;
+ 		size = min_t(int, len - i - 1, burstcnt);
+-		ret = I2C_WRITE_DATA(client, TPM_DATA_FIFO, buf, size);
++		ret = I2C_WRITE_DATA(client, TPM_DATA_FIFO, buf + i, size);
+ 		if (ret < 0)
+ 			goto out_err;
+ 
+-- 
+2.7.4
+

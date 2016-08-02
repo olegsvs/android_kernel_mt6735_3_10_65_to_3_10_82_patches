@@ -1,0 +1,100 @@
+From c1d9c85bc31f1433eb520df77e4df3ed89dc7212 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Tue, 10 May 2016 22:31:48 +0300
+Subject: [PATCH 042/117] JD9365 ver4
+
+---
+ drivers/misc/mediatek/alsps/EPL2182-new/epl2182.c  | 33 ++++++++++++++++++++++
+ .../jd9365_6735_dsi_video/jd9365_6735_dsi_video.c  | 15 ++++++----
+ 2 files changed, 43 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/misc/mediatek/alsps/EPL2182-new/epl2182.c b/drivers/misc/mediatek/alsps/EPL2182-new/epl2182.c
+index 9dcab15..a5d455a 100644
+--- a/drivers/misc/mediatek/alsps/EPL2182-new/epl2182.c
++++ b/drivers/misc/mediatek/alsps/EPL2182-new/epl2182.c
+@@ -43,6 +43,10 @@
+ #include <linux/wakelock.h>
+ #include <linux/sched.h>
+ 
++#ifdef CONFIG_POCKETMOD
++#include <linux/pocket_mod.h>
++#endif
++
+ #include <alsps.h>
+ #include <linux/batch.h>
+ #ifdef CUSTOM_KERNEL_SENSORHUB
+@@ -2137,7 +2141,36 @@ static int epl2182_i2c_remove(struct i2c_client *client)
+ }
+ 
+ 
++#ifdef CONFIG_POCKETMOD
++int epl2182_pocket_detection_check(void)
++{
++	int ps_val;
++	int als_val;
+ 
++	struct epl2182_priv *obj = epl2182_obj;
++	
++	if(obj == NULL)
++	{
++		APS_DBG("[epl2182] epl2182_obj is NULL!");
++		return 0;
++	}
++	else
++	{
++		elan_epl2182_psensor_enable(obj->client, 1);
++
++		msleep(50);
++
++		ps_val = epl2182_get_ps_value(obj, obj->ps);
++		als_val = epl2182_get_als_value(obj, obj->ps);
++
++		APS_DBG("[epl2182] %s als_val = %d, ps_val = %d\n", __func__, als_val, ps_val);
++
++		elan_epl2182_psensor_enable(obj->client, 0);
++
++		return (ps_val);
++	}
++}
++#endif
+ /*----------------------------------------------------------------------------*/
+ static int alsps_local_init(void)
+ {
+diff --git a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+index 7b68c13..13bf6d2 100644
+--- a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+@@ -155,7 +155,7 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
+ {0xE3,1,{0xF8}},
+ 
+ //--- Sequence Ctrl ----//
+-{0x80,1,{0x00}},
++{0x80,1,{0x01}},
+ 
+ //--- Page1  ----//
+ {0xE0,1,{0x01}},
+@@ -224,12 +224,17 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
+ {0x6E,1,{0x25}},
+ {0x6F,1,{0x0F}},
+ 
+-{0x70,1,{0x78}},
+-{0x71,1,{0x44}},
+-{0x72,1,{0x35}},
++
++{0x70,1,{0x20}},
++{0x71,1,{0x13}},
++{0x72,1,{0x06}},
++{0x75,1,{0x03}},
++
++
++
+ {0x73,1,{0x2A}},
+ {0x74,1,{0x27}},
+-{0x75,1,{0x19}},
++
+ {0x76,1,{0x20}},
+ {0x77,1,{0x0D}},
+ {0x78,1,{0x27}},
+-- 
+2.7.4
+

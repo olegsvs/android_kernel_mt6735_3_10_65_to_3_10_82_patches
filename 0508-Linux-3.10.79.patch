@@ -1,0 +1,27 @@
+From b269b9571afe819cb25b1ac6dbd7dab5e716225b Mon Sep 17 00:00:00 2001
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date: Sun, 17 May 2015 09:51:39 -0700
+Subject: [PATCH 0508/1168] Linux 3.10.79
+
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 1292684e17d41129cfb76056ac36ee5c12567e96
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 50362e0..1e6c17f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,6 @@
+ VERSION = 3
+ PATCHLEVEL = 10
+-SUBLEVEL = 78
++SUBLEVEL = 79
+ EXTRAVERSION =
+ NAME = TOSSUG Baby Fish
+ 
+-- 
+2.7.4
+

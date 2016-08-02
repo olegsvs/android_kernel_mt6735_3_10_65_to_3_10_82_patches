@@ -1,0 +1,228 @@
+From 2064c76a196898405479b9f68c60a6c91c8bd34c Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Sun, 8 May 2016 00:52:20 +0300
+Subject: [PATCH 008/117] stk3x1x fix
+
+---
+ drivers/misc/mediatek/alsps/inc/cust_alsps.h       |  2 +-
+ drivers/misc/mediatek/alsps/inc/stk_cust_alsps.h   |  2 +-
+ drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.c  | 40 +------------
+ drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.h  |  1 +
+ .../benefit_m7/alsps/stk3x1x-new/cust_alsps.c      | 66 +++++-----------------
+ include/generated/compile.h                        |  4 +-
+ tools/dct/DCT.log                                  |  5 ++
+ 7 files changed, 27 insertions(+), 93 deletions(-)
+
+diff --git a/drivers/misc/mediatek/alsps/inc/cust_alsps.h b/drivers/misc/mediatek/alsps/inc/cust_alsps.h
+index 70b17db..adcbeee 100755
+--- a/drivers/misc/mediatek/alsps/inc/cust_alsps.h
++++ b/drivers/misc/mediatek/alsps/inc/cust_alsps.h
+@@ -42,7 +42,7 @@ struct alsps_hw {
+ 	unsigned int 	wait_val;
+ };
+ 
+-extern struct alsps_hw* stk_get_cust_alsps_hw(void);
++extern struct alsps_hw* get_cust_alsps_hw(void);
+ 
+  struct alsps_hw* get_alsps_dts_func(const char *, struct alsps_hw*);
+ __weak int pmic_ldo_suspend_enable(int enable);
+diff --git a/drivers/misc/mediatek/alsps/inc/stk_cust_alsps.h b/drivers/misc/mediatek/alsps/inc/stk_cust_alsps.h
+index 70b17db..adcbeee 100644
+--- a/drivers/misc/mediatek/alsps/inc/stk_cust_alsps.h
++++ b/drivers/misc/mediatek/alsps/inc/stk_cust_alsps.h
+@@ -42,7 +42,7 @@ struct alsps_hw {
+ 	unsigned int 	wait_val;
+ };
+ 
+-extern struct alsps_hw* stk_get_cust_alsps_hw(void);
++extern struct alsps_hw* get_cust_alsps_hw(void);
+ 
+  struct alsps_hw* get_alsps_dts_func(const char *, struct alsps_hw*);
+ __weak int pmic_ldo_suspend_enable(int enable);
+diff --git a/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.c b/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.c
+index 29686e4..7aa7233 100755
+--- a/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.c
++++ b/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.c
+@@ -60,7 +60,7 @@
+ #define CUST_EINT_ALS_SENSITIVE 	CUST_EINTF_TRIGGER_LOW 
+ #define CUST_EINT_ALS_POLARITY 		CUST_EINT_ALS_TYPE
+ #define POWER_NONE_MACRO MT65XX_POWER_NONE
+-extern struct alsps_hw* get_cust_alsps_hw(void);
++
+ /******************************************************************************
+  * configuration
+ *******************************************************************************/
+@@ -71,9 +71,6 @@ extern struct alsps_hw* get_cust_alsps_hw(void);
+ 
+ /*----------------------------------------------------------------------------*/
+ #define stk3x1x_DEV_NAME     "stk3x1x"
+-#ifdef CONFIG_POCKETMOD
+-#include <linux/pocket_mod.h>
+-#endif
+ /*----------------------------------------------------------------------------*/
+ #define APS_TAG                  "[ALS/PS] "
+ #define APS_FUN(f)               printk(APS_TAG"%s\n", __FUNCTION__)
+@@ -3354,40 +3351,6 @@ static int __init stk3x1x_init(void)
+ 	return 0;
+ }
+ 
+-
+-
+-
+-#ifdef CONFIG_POCKETMOD
+-int stk3x1x_pocket_detection_check(void)
+-{
+-	int ps_val;
+-	int als_val;
+-
+-	struct stk3x1x_priv *obj = stk3x1x_obj;
+-	
+-	if(obj == NULL)
+-	{
+-		APS_DBG("[stk3x1x] stk3x1x_obj is NULL!");
+-		return 0;
+-	}
+-	else
+-	{
+-		stk3x1x_enable_ps(obj->client, 1);
+-
+-		msleep(50);
+-
+-		ps_val = stk3x1x_get_ps_value(obj, obj->ps);
+-		als_val = stk3x1x_get_als_value(obj, obj->ps);
+-
+-		APS_DBG("[stk3x1x] %s als_val = %d, ps_val = %d\n", __func__, als_val, ps_val);
+-
+-		stk3x1x_enable_ps(obj->client, 0);
+-
+-		return (ps_val);
+-	}
+-}
+-#endif
+-
+ static void __exit stk3x1x_exit(void)
+ {
+ 	APS_FUN();
+@@ -3399,3 +3362,4 @@ module_exit(stk3x1x_exit);
+ MODULE_AUTHOR("MingHsien Hsieh");
+ MODULE_DESCRIPTION("SensorTek stk3x1x proximity and light sensor driver");
+ MODULE_LICENSE("GPL");
++
+diff --git a/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.h b/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.h
+index 9181afd..c6129e8 100755
+--- a/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.h
++++ b/drivers/misc/mediatek/alsps/stk3x1x-new/stk3x1x.h
+@@ -127,3 +127,4 @@
+ #define STK_ALS_CODE_CHANGE_THD	5
+ 
+ #endif
++
+diff --git a/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/cust_alsps.c b/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/cust_alsps.c
+index adf2697..ccfdfc4 100644
+--- a/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/cust_alsps.c
++++ b/drivers/misc/mediatek/mach/mt6735/benefit_m7/alsps/stk3x1x-new/cust_alsps.c
+@@ -1,62 +1,26 @@
+-/* Copyright Statement:
+- *
+- * This software/firmware and related documentation ("MediaTek Software") are
+- * protected under relevant copyright laws. The information contained herein
+- * is confidential and proprietary to MediaTek Inc. and/or its licensors.
+- * Without the prior written permission of MediaTek inc. and/or its licensors,
+- * any reproduction, modification, use or disclosure of MediaTek Software,
+- * and information contained herein, in whole or in part, shall be strictly prohibited.
+- */
+-/* MediaTek Inc. (C) 2010. All rights reserved.
+- *
+- * BY OPENING THIS FILE, RECEIVER HEREBY UNEQUIVOCALLY ACKNOWLEDGES AND AGREES
+- * THAT THE SOFTWARE/FIRMWARE AND ITS DOCUMENTATIONS ("MEDIATEK SOFTWARE")
+- * RECEIVED FROM MEDIATEK AND/OR ITS REPRESENTATIVES ARE PROVIDED TO RECEIVER ON
+- * AN "AS-IS" BASIS ONLY. MEDIATEK EXPRESSLY DISCLAIMS ANY AND ALL WARRANTIES,
+- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT.
+- * NEITHER DOES MEDIATEK PROVIDE ANY WARRANTY WHATSOEVER WITH RESPECT TO THE
+- * SOFTWARE OF ANY THIRD PARTY WHICH MAY BE USED BY, INCORPORATED IN, OR
+- * SUPPLIED WITH THE MEDIATEK SOFTWARE, AND RECEIVER AGREES TO LOOK ONLY TO SUCH
+- * THIRD PARTY FOR ANY WARRANTY CLAIM RELATING THERETO. RECEIVER EXPRESSLY ACKNOWLEDGES
+- * THAT IT IS RECEIVER'S SOLE RESPONSIBILITY TO OBTAIN FROM ANY THIRD PARTY ALL PROPER LICENSES
+- * CONTAINED IN MEDIATEK SOFTWARE. MEDIATEK SHALL ALSO NOT BE RESPONSIBLE FOR ANY MEDIATEK
+- * SOFTWARE RELEASES MADE TO RECEIVER'S SPECIFICATION OR TO CONFORM TO A PARTICULAR
+- * STANDARD OR OPEN FORUM. RECEIVER'S SOLE AND EXCLUSIVE REMEDY AND MEDIATEK'S ENTIRE AND
+- * CUMULATIVE LIABILITY WITH RESPECT TO THE MEDIATEK SOFTWARE RELEASED HEREUNDER WILL BE,
+- * AT MEDIATEK'S OPTION, TO REVISE OR REPLACE THE MEDIATEK SOFTWARE AT ISSUE,
+- * OR REFUND ANY SOFTWARE LICENSE FEES OR SERVICE CHARGE PAID BY RECEIVER TO
+- * MEDIATEK FOR SUCH MEDIATEK SOFTWARE AT ISSUE.
+- *
+- * The following software/firmware and/or related documentation ("MediaTek Software")
+- * have been modified by MediaTek Inc. All revisions are subject to any receiver's
+- * applicable license agreements with MediaTek Inc.
+- */
+-
+ #include <linux/types.h>
+-#include "stk_cust_alsps.h"
+ #include <mach/mt_pm_ldo.h>
++#include <cust_alsps.h>
++#include <mach/upmu_common.h>
+ 
+ static struct alsps_hw cust_alsps_hw = {
+-	/* i2c bus number, for mt657x, default=0. For mt6589, default=3 */
+-
+-    .i2c_num    = 2,	
+-	//.polling_mode =1,
++    .i2c_num    = 2,
+ 	.polling_mode_ps =0,
+-	.polling_mode_als =1,   
++	.polling_mode_als =1,
+     .power_id   = MT65XX_POWER_NONE,    /*LDO is not used*/
+     .power_vol  = VOL_DEFAULT,          /*LDO is not used*/
+-    .i2c_addr   = {0x90, 0x00, 0x00, 0x00},	/*STK3x1x*/
+-    .als_level  = {5,  9, 36, 59, 90, 260, 300, 400, 500, 845, 1136, 1545, 2364, 4655, 6982},	/* als_code */
+-    .als_value  = {10, 10, 40, 65, 90, 145, 225, 300, 550, 930, 1250, 1700, 2600, 5120, 7680, 10240},    /* lux */
+-   	.state_val = 0x0,		/* disable all */
+-	.psctrl_val = 0x31,		/* ps_persistance=1, ps_gain=64X, PS_IT=0.391ms */
+-	.alsctrl_val = 0x2A,	/* als_persistance=1, als_gain=16X, ALS_IT=200ms */
+-	.ledctrl_val = 0xFF,	/* 100mA IRDR, 64/64 LED duty */
+-	.wait_val = 0x7,		/* 50 ms */
+-    .ps_threshold_high = 1700,
+-    .ps_threshold_low = 1500,
++    //.i2c_addr   = {0x0C, 0x48, 0x78, 0x00},
++    //.als_level  = { 0,  1,  1,   7,  15,  15,  100, 1000, 2000,  3000,  6000, 10000, 14000, 18000, 20000},
++    //.als_value  = {40, 40, 90,  90, 160, 160,  225,  320,  640,  1280,  1280,  2600,  2600, 2600,  10240, 10240},
++    /* MTK: modified to support AAL */
++    .als_level  = {0, 89, 288, 464, 856, 2128, 2844, 4192, 5723, 6339, 8008, 11008, 11421, 11421, 65535},
++    .als_value  = {0, 134, 305, 501, 1005, 2002, 3002, 5000, 8012, 10020, 12010, 16020, 20020, 20020, 20020, 20020},
++    .ps_threshold_high = 450,
++    .ps_threshold_low = 400,
++    .is_batch_supported_ps = false,
++    .is_batch_supported_als = false,
+ };
+ struct alsps_hw *get_cust_alsps_hw(void) {
+     return &cust_alsps_hw;
+ }
++
+diff --git a/include/generated/compile.h b/include/generated/compile.h
+index 0a5239e..3c17595 100644
+--- a/include/generated/compile.h
++++ b/include/generated/compile.h
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 8 */
++/* This file is auto generated, version 12 */
+ /* SMP PREEMPT */
+ #define UTS_MACHINE "arm64"
+-#define UTS_VERSION "#8 SMP PREEMPT Sun May 8 00:06:26 MSK 2016"
++#define UTS_VERSION "#12 SMP PREEMPT Sun May 8 00:50:51 MSK 2016"
+ #define LINUX_COMPILE_BY "olegsvs"
+ #define LINUX_COMPILE_HOST "olegsvs-develop"
+ #define LINUX_COMPILER "gcc version 4.9 20150123 (prerelease) (GCC) "
+diff --git a/tools/dct/DCT.log b/tools/dct/DCT.log
+index e69de29..701d203 100644
+--- a/tools/dct/DCT.log
++++ b/tools/dct/DCT.log
+@@ -0,0 +1,5 @@
++/* Log generated by MTK SP DrvGen Version 03.13.6;
++ Log Time is Sun May 08 00:16:13 2016
++ */
++open operater parse MT6735M.fig OK!
++Edit operater parse .cmp file OK!
+-- 
+2.7.4
+

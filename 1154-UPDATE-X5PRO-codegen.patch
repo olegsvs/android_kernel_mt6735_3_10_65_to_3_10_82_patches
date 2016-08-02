@@ -1,0 +1,39 @@
+From a6ef4a44eda8ed236d512378cd4039a4e396d64a Mon Sep 17 00:00:00 2001
+From: SnowCatPDA <snowcat@vpro.ru>
+Date: Thu, 26 May 2016 07:57:50 +0500
+Subject: [PATCH 1154/1168] UPDATE X5PRO codegen
+
+---
+ .../mach/mt6735/X5PRO_6735m/dct/dct/codegen.dws     | Bin 29675 -> 29684 bytes
+ .../mt6735/X5PRO_6735m/power/cust_battery_meter.h   |   4 ++--
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/dct/dct/codegen.dws b/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/dct/dct/codegen.dws
+index acbd1f6773447f0a5be7728eeedc12deda39c2e7..e52ace7aff7a40ac27d4846eae24621c77eedba6 100755
+GIT binary patch
+delta 65
+zcmV-H0KWh0=K=KR0kEqO9vc7v07p<sPhUepO+`{cUq(zpQ%GM$SX41zP)Sackpwf7
+XumuQ{;2Ic{@J$4hpAZML9uduA@FW(U
+
+delta 48
+zcmezJobmN@#to|lM1>d_7~BIq{o~zy9D_aLeOz7QUHv9cWHFw+ft6!&gP`(eb-}Yq
+E0H&Z2Z~y=R
+
+diff --git a/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/power/cust_battery_meter.h b/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/power/cust_battery_meter.h
+index c1a1518..d83c553 100644
+--- a/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/power/cust_battery_meter.h
++++ b/drivers/misc/mediatek/mach/mt6735/X5PRO_6735m/power/cust_battery_meter.h
+@@ -7,8 +7,8 @@
+ // define
+ // ============================================================
+ //#define SOC_BY_AUXADC
+-#define SOC_BY_HW_FG
+-//#define SOC_BY_SW_FG
++//#define SOC_BY_HW_FG
++#define SOC_BY_SW_FG
+ 
+ //#define CONFIG_DIS_CHECK_BATTERY
+ //#define FIXED_TBAT_25
+-- 
+2.7.4
+

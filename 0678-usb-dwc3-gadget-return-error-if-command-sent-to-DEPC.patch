@@ -1,0 +1,38 @@
+From 717c6398743226d2e0f45ab04c43407100b823d3 Mon Sep 17 00:00:00 2001
+From: Subbaraya Sundeep Bhatta <subbaraya.sundeep.bhatta@xilinx.com>
+Date: Thu, 21 May 2015 15:46:48 +0530
+Subject: [PATCH 0678/1168] usb: dwc3: gadget: return error if command sent to
+ DEPCMD register fails
+
+commit 76e838c9f7765f9a6205b4d558d75a66104bc60d upstream.
+
+We need to return error to caller if command is not sent to
+controller succesfully.
+
+Signed-off-by: Subbaraya Sundeep Bhatta <sbhatta@xilinx.com>
+Fixes: 72246da40f37 (usb: Introduce DesignWare USB3 DRD Driver)
+Signed-off-by: Felipe Balbi <balbi@ti.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: bcf9c741b990ca557c4b88d889d48e28668c85b4
+---
+ drivers/usb/dwc3/gadget.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/usb/dwc3/gadget.c b/drivers/usb/dwc3/gadget.c
+index be6fa45..6e70c88 100755
+--- a/drivers/usb/dwc3/gadget.c
++++ b/drivers/usb/dwc3/gadget.c
+@@ -357,6 +357,8 @@ int dwc3_send_gadget_ep_cmd(struct dwc3 *dwc, unsigned ep,
+ 		if (!(reg & DWC3_DEPCMD_CMDACT)) {
+ 			dev_vdbg(dwc->dev, "Command Complete --> %d\n",
+ 					DWC3_DEPCMD_STATUS(reg));
++			if (DWC3_DEPCMD_STATUS(reg))
++				return -EINVAL;
+ 			return 0;
+ 		}
+ 
+-- 
+2.7.4
+

@@ -1,0 +1,44 @@
+From 48985e1e42de8f0875b263f006c75b3821aa43c3 Mon Sep 17 00:00:00 2001
+From: olegsvs <oleg.texet@gmail.com>
+Date: Tue, 10 May 2016 22:38:39 +0300
+Subject: [PATCH 1095/1168] JD9365 ver6
+
+---
+ .../misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c | 6 +-----
+ include/generated/compile.h                                         | 4 ++--
+ 2 files changed, 3 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+index 22667d6..963cccb 100644
+--- a/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
++++ b/drivers/misc/mediatek/lcm/jd9365_6735_dsi_video/jd9365_6735_dsi_video.c
+@@ -230,11 +230,7 @@ static struct LCM_setting_table lcm_initialization_setting[] = {
+ {0x6F,1,{0x0F}},
+ 
+ {0x70,1,{0x78}},
+-{0x71,1,{0x44}},
+-{0x72,1,{0x35}},
+-{0x73,1,{0x2A}},
+-{0x74,1,{0x27}},
+-{0x75,1,{0x19}},
++
+ {0x76,1,{0x20}},
+ {0x77,1,{0x0D}},
+ {0x78,1,{0x27}},
+diff --git a/include/generated/compile.h b/include/generated/compile.h
+index 0ee4647..4be49fa 100644
+--- a/include/generated/compile.h
++++ b/include/generated/compile.h
+@@ -1,7 +1,7 @@
+-/* This file is auto generated, version 17 */
++/* This file is auto generated, version 18 */
+ /* SMP PREEMPT */
+ #define UTS_MACHINE "arm64"
+-#define UTS_VERSION "#17 SMP PREEMPT Tue May 10 22:32:00 MSK 2016"
++#define UTS_VERSION "#18 SMP PREEMPT Tue May 10 22:35:31 MSK 2016"
+ #define LINUX_COMPILE_BY "olegsvs"
+ #define LINUX_COMPILE_HOST "olegsvs-develop"
+ #define LINUX_COMPILER "gcc version 4.9 20150123 (prerelease) (GCC) "
+-- 
+2.7.4
+

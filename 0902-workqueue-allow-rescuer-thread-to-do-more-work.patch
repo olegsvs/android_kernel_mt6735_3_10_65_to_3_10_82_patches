@@ -1,0 +1,91 @@
+From 5790ab523050ec73b33c3ef4e994968298b215c0 Mon Sep 17 00:00:00 2001
+From: NeilBrown <neilb@suse.de>
+Date: Mon, 8 Dec 2014 12:39:16 -0500
+Subject: [PATCH 0902/1168] workqueue: allow rescuer thread to do more work.
+
+When there is serious memory pressure, all workers in a pool could be
+blocked, and a new thread cannot be created because it requires memory
+allocation.
+
+In this situation a WQ_MEM_RECLAIM workqueue will wake up the
+rescuer thread to do some work.
+
+The rescuer will only handle requests that are already on ->worklist.
+If max_requests is 1, that means it will handle a single request.
+
+The rescuer will be woken again in 100ms to handle another max_requests
+requests.
+
+I've seen a machine (running a 3.0 based "enterprise" kernel) with
+thousands of requests queued for xfslogd, which has a max_requests of
+1, and is needed for retiring all 'xfs' write requests.  When one of
+the worker pools gets into this state, it progresses extremely slowly
+and possibly never recovers (only waited an hour or two).
+
+With this patch we leave a pool_workqueue on mayday list
+until it is clearly no longer in need of assistance.  This allows
+all requests to be handled in a timely fashion.
+
+We keep each pool_workqueue on the mayday list until
+need_to_create_worker() is false, and no work for this workqueue is
+found in the pool.
+
+I have tested this in combination with a (hackish) patch which forces
+all work items to be handled by the rescuer thread.  In that context
+it significantly improves performance.  A similar patch for a 3.0
+kernel significantly improved performance on a heavy work load.
+
+Thanks to Jan Kara for some design ideas, and to Dongsu Park for
+some comments and testing.
+
+tj: Inverted the lock order between wq_mayday_lock and pool->lock with
+    a preceding patch and simplified this patch.  Added comment and
+    updated changelog accordingly.  Dongsu spotted missing get_pwq()
+    in the simplified code.
+
+Cc: Dongsu Park <dongsu.park@profitbricks.com>
+Cc: Jan Kara <jack@suse.cz>
+Cc: Lai Jiangshan <laijs@cn.fujitsu.com>
+Signed-off-by: NeilBrown <neilb@suse.de>
+Signed-off-by: Tejun Heo <tj@kernel.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 55a30858388002afb7a028b36afc4babd99ef14e
+---
+ kernel/workqueue.c | 20 +++++++++++++++++++-
+ 1 file changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/kernel/workqueue.c b/kernel/workqueue.c
+index 1c02038..e0a4ab1 100644
+--- a/kernel/workqueue.c
++++ b/kernel/workqueue.c
+@@ -2433,7 +2433,25 @@ repeat:
+ 			if (get_work_pwq(work) == pwq)
+ 				move_linked_works(work, scheduled, &n);
+ 
+-		process_scheduled_works(rescuer);
++		if (!list_empty(scheduled)) {
++			process_scheduled_works(rescuer);
++
++			/*
++			 * The above execution of rescued work items could
++			 * have created more to rescue through
++			 * pwq_activate_first_delayed() or chained
++			 * queueing.  Let's put @pwq back on mayday list so
++			 * that such back-to-back work items, which may be
++			 * being used to relieve memory pressure, don't
++			 * incur MAYDAY_INTERVAL delay inbetween.
++			 */
++			if (need_to_create_worker(pool)) {
++				spin_lock(&wq_mayday_lock);
++				get_pwq(pwq);
++				list_move_tail(&pwq->mayday_node, &wq->maydays);
++				spin_unlock(&wq_mayday_lock);
++			}
++		}
+ 
+ 		/*
+ 		 * Put the reference grabbed by send_mayday().  @pool won't
+-- 
+2.7.4
+

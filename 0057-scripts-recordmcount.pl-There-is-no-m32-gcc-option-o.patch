@@ -1,0 +1,50 @@
+From a1fbdca96692c4469300b90f104380c6edbc8f14 Mon Sep 17 00:00:00 2001
+From: Michael Karcher <kernel@mkarcher.dialup.fu-berlin.de>
+Date: Sun, 18 Jan 2015 00:36:15 +0100
+Subject: [PATCH 0057/1168] scripts/recordmcount.pl: There is no -m32 gcc
+ option on Super-H anymore
+
+commit 1caf6aaaa47471831d77c75f094d4e00ad1ec808 upstream.
+
+Compiling SH with gcc-4.8 fails due to the -m32 option not being
+supported.
+
+From http://buildd.debian-ports.org/status/fetch.php?pkg=linux&arch=sh4&ver=3.16.7-ckt4-1&stamp=1421425783
+
+      CC      init/main.o
+    gcc-4.8: error: unrecognized command line option '-m32'
+    ld: cannot find init/.tmp_mc_main.o: No such file or directory
+    objcopy: 'init/.tmp_mx_main.o': No such file
+    rm: cannot remove 'init/.tmp_mx_main.o': No such file or directory
+    rm: cannot remove 'init/.tmp_mc_main.o': No such file or directory
+
+Link: http://lkml.kernel.org/r/1421537778-29001-1-git-send-email-kernel@mkarcher.dialup.fu-berlin.de
+Link: http://lkml.kernel.org/r/54BCBDD4.10102@physik.fu-berlin.de
+
+Cc: Matt Fleming <matt@console-pimps.org>
+Reported-by: John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
+Signed-off-by: Michael Karcher <kernel@mkarcher.dialup.fu-berlin.de>
+Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: 3c05d8afa3d544c924c5850d876ea33c31f98834
+---
+ scripts/recordmcount.pl | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/scripts/recordmcount.pl b/scripts/recordmcount.pl
+index 151739b..aead5de 100755
+--- a/scripts/recordmcount.pl
++++ b/scripts/recordmcount.pl
+@@ -262,7 +262,6 @@ if ($arch eq "x86_64") {
+     # force flags for this arch
+     $ld .= " -m shlelf_linux";
+     $objcopy .= " -O elf32-sh-linux";
+-    $cc .= " -m32";
+ 
+ } elsif ($arch eq "powerpc") {
+     $local_regex = "^[0-9a-fA-F]+\\s+t\\s+(\\.?\\S+)";
+-- 
+2.7.4
+

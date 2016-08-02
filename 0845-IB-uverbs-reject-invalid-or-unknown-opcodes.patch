@@ -1,0 +1,57 @@
+From 923d16d7fd634262f1d040a159d2b262db0eed7e Mon Sep 17 00:00:00 2001
+From: Christoph Hellwig <hch@lst.de>
+Date: Wed, 26 Aug 2015 11:00:37 +0200
+Subject: [PATCH 0845/1168] IB/uverbs: reject invalid or unknown opcodes
+
+commit b632ffa7cee439ba5dce3b3bc4a5cbe2b3e20133 upstream.
+
+We have many WR opcodes that are only supported in kernel space
+and/or require optional information to be copied into the WR
+structure.  Reject all those not explicitly handled so that we
+can't pass invalid information to drivers.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Reviewed-by: Jason Gunthorpe <jgunthorpe@obsidianresearch.com>
+Reviewed-by: Sagi Grimberg <sagig@mellanox.com>
+Signed-off-by: Doug Ledford <dledford@redhat.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Stefan Guendhoer <stefan@guendhoer.com>
+
+Former-commit-id: c9c15f34bb632a25b03e3dff9a62691aa86f9a17
+---
+ drivers/infiniband/core/uverbs_cmd.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/infiniband/core/uverbs_cmd.c b/drivers/infiniband/core/uverbs_cmd.c
+index a7d00f6..44c15ce 100755
+--- a/drivers/infiniband/core/uverbs_cmd.c
++++ b/drivers/infiniband/core/uverbs_cmd.c
+@@ -2106,6 +2106,12 @@ ssize_t ib_uverbs_post_send(struct ib_uverbs_file *file,
+ 		next->send_flags = user_wr->send_flags;
+ 
+ 		if (is_ud) {
++			if (next->opcode != IB_WR_SEND &&
++			    next->opcode != IB_WR_SEND_WITH_IMM) {
++				ret = -EINVAL;
++				goto out_put;
++			}
++
+ 			next->wr.ud.ah = idr_read_ah(user_wr->wr.ud.ah,
+ 						     file->ucontext);
+ 			if (!next->wr.ud.ah) {
+@@ -2142,9 +2148,11 @@ ssize_t ib_uverbs_post_send(struct ib_uverbs_file *file,
+ 					user_wr->wr.atomic.compare_add;
+ 				next->wr.atomic.swap = user_wr->wr.atomic.swap;
+ 				next->wr.atomic.rkey = user_wr->wr.atomic.rkey;
++			case IB_WR_SEND:
+ 				break;
+ 			default:
+-				break;
++				ret = -EINVAL;
++				goto out_put;
+ 			}
+ 		}
+ 
+-- 
+2.7.4
+
